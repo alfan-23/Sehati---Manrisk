@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMR AI Pro - Manajemen Risiko Kemenkes RI</title>
+    <title>SIMR AI Pro - Manajemen Risiko</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -16,7 +16,6 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* CSS Print Spesifik Layout Kemenkes */
         @media print {
             @page { size: landscape; margin: 0.5cm; }
             body, html, #root, .flex, .overflow-y-auto, .overflow-x-hidden, main, .min-h-screen {
@@ -45,6 +44,9 @@
 <body class="selection:bg-emerald-100">
 
     <div id="mainAppWrapper" class="w-full min-h-screen no-select relative">
+        <div id="userInfoFloating" class="fixed top-4 right-4 z-[100] bg-white text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-emerald-200 flex items-center gap-2 no-print">
+            <i class="fas fa-shield-alt text-emerald-600"></i> <span class="text-slate-700 uppercase">Akses Portal Terenkripsi</span>
+        </div>
         <div id="root"></div>
     </div>
 
@@ -65,31 +67,95 @@
             return <i className={`fas fa-${name === 'Building2' ? 'building' : name === 'AlertTriangle' ? 'exclamation-triangle' : name === 'Target' ? 'bullseye' : name === 'Search' ? 'search' : name === 'Printer' ? 'print' : name === 'BrainCircuit' ? 'brain' : name === 'Save' ? 'save' : name === 'Upload' ? 'upload' : name === 'Activity' ? 'chart-line' : name === 'Sparkles' ? 'wand-magic-sparkles' : name === 'Trash2' ? 'trash' : name === 'ChevronLeft' ? 'chevron-left' : name === 'ChevronRight' ? 'chevron-right' : 'circle'} ${className}`}></i>;
         };
 
+        // HIERARKI ILP FULL 100% TIDAK ADA YANG DIHAPUS
         const ILP_DATABASE = {
             "KLASTER 1: MANAJEMEN": {
-                "Penyelenggaraan Manajemen Puskesmas": {
-                    "Perencanaan (P1)": ["Membentuk Tim Perencanaan", "Analisis Situasi", "Perumusan Masalah", "Penyusunan RUK dan RPK"],
-                    "Pengawasan dan Penilaian (P3)": ["Audit Internal", "Menerima Pengawasan Eksternal", "Monitoring & Tinjauan Manajemen", "Penilaian Kinerja (PKP)"]
+                "Program 1: Penyelenggaraan Manajemen Puskesmas": {
+                    "Kegiatan: Perencanaan (P1)": ["Membentuk Tim Perencanaan Puskesmas", "Melakukan Analisis Situasi (Pengumpulan dan Analisis Data, termasuk Survei Mawas Diri/SMD)", "Melakukan Perumusan Masalah (Identifikasi, Penetapan Prioritas, Mencari Akar Penyebab)", "Menyusun dokumen Perencanaan Lima Tahunan dan Tahunan (RUK dan RPK)"],
+                    "Kegiatan: Penggerakan dan Pelaksanaan (P2)": ["Melaksanakan Lokakarya Mini Bulanan", "Melaksanakan Lokakarya Mini Tribulanan"],
+                    "Kegiatan: Pengawasan, Pengendalian, dan Penilaian Kinerja (P3)": ["Melaksanakan Pengawasan Internal (audit internal dan supervisi)", "Menerima Pengawasan Eksternal (Dinkes & Akreditasi)", "Melakukan Pengendalian (monitoring & Tinjauan Manajemen)", "Melakukan Penilaian Kinerja Puskesmas (PKP)"]
                 },
-                "Penyelenggaraan PMKP": {
-                    "Mutu & Keselamatan": ["Menetapkan Area Prioritas", "Kamus Indikator Mutu"],
-                    "Manajemen Risiko": ["Identifikasi Risiko Proaktif", "Analisis & Evaluasi Risiko", "FMEA"],
-                    "Keselamatan Pasien": ["Monitoring 6 SKP", "Pelaporan IKP", "Investigasi RCA / Sentinel"],
-                    "PPI & K3": ["Penerapan Kewaspadaan Standar", "Surveilans HAIs", "K3 Fasilitas"],
-                    "Manajemen Fasilitas (MFK)": ["Keamanan Fasilitas", "Manajemen B3", "Tanggap Bencana"]
+                "Program 2: Pengelolaan Sumber Daya Puskesmas": {
+                    "Kegiatan: Pengelolaan Keuangan": ["Penyusunan Rencana Kerja Anggaran (RKA)", "Penatausahaan dan Pembukuan Keuangan", "Verifikasi dan Pelaporan Pertanggungjawaban (SPJ)"],
+                    "Kegiatan: Pengelolaan SDM": ["Administrasi Kepegawaian (File, Absensi, Cuti, SKP)", "Analisis Beban Kerja dan Perencanaan Kebutuhan Tenaga", "Pengembangan Kompetensi (Usulan Pelatihan)"],
+                    "Kegiatan: Pengelolaan Aset, Sarana, dan Prasarana": ["Inventarisasi dan Pelabelan Aset", "Pemeliharaan Rutin Sarana dan Prasarana", "Kalibrasi Peralatan Medis", "Pengusulan Penghapusan Aset"],
+                    "Kegiatan: Pengelolaan Sediaan Farmasi & BMHP": ["Perencanaan (LPLPO), Pengadaan, Penerimaan, Penyimpanan", "Pendistribusian, Pengendalian, Stock Opname, Pelaporan"]
+                },
+                "Program 3: Penyelenggaraan PMKP (Peningkatan Mutu & Keselamatan Pasien)": {
+                    "Kegiatan: Perencanaan Mutu": ["Menetapkan Area Prioritas Mutu Klinis & Klaster", "Menyusun Kamus Indikator Mutu (INM & IMPP)", "Menyusun Program Kerja PMKP"],
+                    "Kegiatan: Pengukuran, Analisis, dan Peningkatan Kinerja": ["Pengumpulan data indikator mutu periodik", "Validasi data internal", "Analisis capaian vs target", "Pelaksanaan PDSA/PDCA", "Audit klinis dan audit internal"],
+                    "Kegiatan: Manajemen Risiko": ["Identifikasi risiko proaktif", "Analisis dan evaluasi (grading) risiko", "Penyusunan rencana mitigasi risiko", "Pengelolaan Register Risiko", "Pelaksanaan FMEA untuk proses berisiko tinggi"],
+                    "Kegiatan: Keselamatan Pasien": ["Monitoring 6 Sasaran Keselamatan Pasien (SKP)", "Pelaporan IKP Eksternal (Aplikasi Online)", "Pelaporan IKP Internal (KPC, KTC, KNC)", "Investigasi sederhana insiden", "RCA untuk Sentinel/KTD Berat"],
+                    "Kegiatan: Pencegahan & Pengendalian Infeksi (PPI)": ["Penerapan Kewaspadaan Standar & Transmisi", "Surveilans HAIs", "Investigasi outbreak", "Penerapan Bundles PPI", "Diklat PPI"],
+                    "Kegiatan: K3 (Keselamatan & Kesehatan Kerja)": ["Identifikasi potensi bahaya lingkungan kerja", "Pemeriksaan kesehatan berkala pegawai", "Penanganan Kecelakaan Akibat Kerja", "Penyediaan APD & imunisasi petugas"],
+                    "Kegiatan: Manajemen Fasilitas & Keselamatan (MFK)": ["Manajemen keselamatan & keamanan fasilitas", "Manajemen B3 dan Limbah B3", "Manajemen kedaruratan & bencana", "Manajemen pengamanan kebakaran (APAR)", "Manajemen alat kesehatan", "Manajemen sistem utilitas"]
+                },
+                "Program 4: Pengelolaan Jejaring & SI": {
+                    "Kegiatan: Manajemen Jejaring": ["Pembinaan teknis jejaring (Pustu, Posyandu)", "Evaluasi kerjasama (MoU/PKS)"],
+                    "Kegiatan: Manajemen SI": ["Pengelolaan SIMPUS & ASIK", "Validasi integrasi SatuSehat", "Analisis dashboard PWS"]
                 }
             },
             "KLASTER 2: IBU DAN ANAK": {
-                "Kes Ibu Hamil, Bersalin, Nifas": { "ANC Terpadu": ["Pemeriksaan Kehamilan", "Skrining TBC Ibu Hamil", "Triple Eliminasi"], "Persalinan & Nifas": ["Pertolongan Persalinan", "Pelayanan Nifas"] },
-                "Kes Balita & Pra Sekolah": { "Neonatal": ["KN1-KN3 & Vit K1"], "Imunisasi": ["Imunisasi Dasar", "Lanjutan"] }
+                "Program 1: Kes Ibu Hamil, Bersalin, Nifas": {
+                    "Kegiatan: ANC Terpadu": ["Pemeriksaan kehamilan (6x, 10T, USG dokter)", "Skrining TBC pada ibu hamil", "Skrining HIV, Sifilis, Hepatitis B pada ibu hamil", "Skrining kesehatan gigi ibu hamil"],
+                    "Kegiatan: Kelas Ibu Hamil": ["Diskusi kelompok & senam hamil"],
+                    "Kegiatan: Pemberian Tambahan Asupan Gizi": ["Pemberian MT Bumil KEK (min 90 hari)"],
+                    "Kegiatan: Persalinan Normal": ["Pertolongan persalinan di fasyankes"],
+                    "Kegiatan: Pelayanan Nifas": ["Pelayanan nifas (KF1-KF4), Vit A, KB pasca salin"]
+                },
+                "Program 2: Kes Balita & Pra Sekolah": {
+                    "Kegiatan: Neonatal Esensial": ["Kunjungan Neonatal (KN1-KN3), Vit K1, Salep Mata, HBO"],
+                    "Kegiatan: Pemantauan Tumbuh Kembang": ["Penimbangan, pengukuran, SDIDTK/KPSP"],
+                    "Kegiatan: Imunisasi Rutin": ["Imunisasi dasar bayi (BCG, Polio, DPT, Campak)", "Imunisasi lanjutan baduta"],
+                    "Kegiatan: Tatalaksana Gizi": ["Tatalaksana weight faltering, gizi kurang/buruk, stunting"],
+                    "Kegiatan: Pengobatan Balita Sakit": ["Pelayanan MTBS"]
+                },
+                "Program 3: Kes Anak Sekolah & Remaja": {
+                    "Kegiatan: Skrining & Imunisasi": ["Penjaringan kesehatan (Anemia, TBC, PTM, Jiwa)", "Imunisasi BIAS (MR, Dt, Td, HPV)"],
+                    "Kegiatan: Pelayanan Klinis": ["Pelayanan PKPR (MTPKR & HEEADSSS)"],
+                    "Kegiatan: TTD Remaja Putri": ["Pemberian TTD Rematri (mingguan)"]
+                }
             },
-            "KLASTER 3: USIA DEWASA & LANSIA": {
-                "Kesehatan Dewasa & Lansia": { "Skrining PTM": ["Skrining Obesitas", "Skrining Hipertensi & DM", "Skrining Kanker Sadanis/IVA", "Skrining Jiwa"] }
+            "KLASTER 3: USIA DEWASA DAN LANJUT USIA": {
+                "Program 1: Kes Dewasa & Lansia": {
+                    "Kegiatan: Skrining PTM": ["Skrining Obesitas (IMT, Lingkar Perut)", "Skrining Hipertensi", "Skrining Diabetes Melitus", "Skrining Jantung & Stroke (EKG, Profil Lipid)", "Skrining Kanker (SADANIS, IVA)", "Skrining Jiwa (SRQ-20, ASSIST)"],
+                    "Kegiatan: Kes Gigi & Mulut": ["Pelayanan kuratif & rehabilitatif gigi"],
+                    "Kegiatan: Skrining Penyakit Menular": ["Skrining TBC, Malaria, Talasemia"]
+                },
+                "Program 2: Kes Khusus Dewasa": {
+                    "Kegiatan: Kes Reproduksi": ["Pelayanan Catin (KIE, Skrining)", "Skrining Layak Hamil PUS", "Pelayanan KB"],
+                    "Kegiatan: Penyakit Akibat Kerja": ["Diagnosis PAK (7 langkah)"]
+                },
+                "Program 3: Kes Khusus Lansia": {
+                    "Kegiatan: Skrining Geriatri": ["Skrining ADL & SKILAS (ICOPE)"],
+                    "Kegiatan: Home Care": ["Perawatan Lansia di Rumah (Ketergantungan)"]
+                }
+            },
+            "KLASTER 4: PENYAKIT MENULAR": {
+                "Program 1: Surveilans & SKDR": {
+                    "Kegiatan: Pemantauan Data": ["Analisis PWS & Potensi KLB"],
+                    "Kegiatan: Respon Cepat": ["Pelaporan SKDR < 24 jam & Verifikasi Sinyal"]
+                },
+                "Program 2: Respon Penyakit": {
+                    "Kegiatan: PE & Kontak": ["Pelacakan Kontak (Tracing)"],
+                    "Kegiatan: Pengendalian Faktor Risiko": ["Inspeksi Kesehatan Lingkungan (IKL)", "Pengendalian Vektor & Binatang Pembawa Penyakit", "Intervensi Kesehatan Lingkungan"],
+                    "Kegiatan: Respon KLB": ["Pengambilan spesimen/sampel", "Imunisasi ORI"]
+                }
             },
             "LINTAS KLASTER": {
-                "Gawat Darurat": { "Pelayanan IGD": ["Triase", "Resusitasi & Stabilisasi", "Tatalaksana Definitif & Rujukan"] },
-                "Kefarmasian": { "Farmasi Klinis": ["Pengkajian & Pelayanan Resep", "PIO", "Visite Rawat Inap"] },
-                "Laboratorium": { "Pelayanan Lab": ["Pemeriksaan Spesimen Klinis"] }
+                "Program 1: Gawat Darurat": {
+                    "Kegiatan: Pelayanan IGD": ["Triase", "Survei Primer (Resusitasi/Stabilisasi)", "Survei Sekunder", "Tatalaksana Definitif & Rujukan"]
+                },
+                "Program 2: Kefarmasian": {
+                    "Kegiatan: Farmasi Klinis": ["Pengkajian & Pelayanan Resep", "Pelayanan Informasi Obat (PIO)", "Konseling Obat", "Visite Rawat Inap", "Pemantauan Terapi Obat (PTO)", "Monitoring Efek Samping Obat (MESO)", "Home Pharmacy Care"]
+                },
+                "Program 3: Laboratorium": {
+                    "Kegiatan: Pemeriksaan Spesimen": ["Pemeriksaan Klinis (Hematologi, Kimia, Urin, dll)", "Pemeriksaan Lingkungan/Vektor"],
+                    "Kegiatan: Surveilans Lab": ["Surveilans Pasif & Aktif"]
+                },
+                "Program 4: Rawat Inap": {
+                    "Kegiatan: Perawatan Pasien": ["Rawat Inap (max 5 hari)", "Stabilisasi Pra-Rujukan", "Observasi Diagnostik"]
+                }
             }
         };
 
@@ -106,10 +172,11 @@
 
         const generateKode = (kategori, index) => `${kategori ? kategori.substring(0, 3).toUpperCase() : 'RSK'}-${String(index).padStart(2, '0')}`;
 
-        // MESIN AI TERBARU: Langsung Tembak ke 1.5-Flash (Secepat Kilat)
+        // PERBAIKAN FATAL: Memanggil model secara hardcode agar tidak kena Error 404 karena state
         const callGeminiJson = async (prompt, schemaFormat, userApiKey) => {
-            if (!userApiKey) throw new Error("API Key belum terhubung dengan Portal. Silakan isi di menu samping kiri.");
+            if (!userApiKey) throw new Error("API Key belum terhubung dengan Portal.");
             
+            // Langsung tembak 1.5-flash
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
             const fullPrompt = `TUGAS: Anda adalah asisten pakar Manajemen Risiko Fasyankes. Berikan hasil HANYA dalam format JSON valid tanpa penjelasan apapun.\n\nSKEMA JSON:\n${JSON.stringify(schemaFormat, null, 2)}\n\nPERINTAH:\n${prompt}`;
             
@@ -127,6 +194,7 @@
                             window.parent.postMessage({ type: 'API_ERROR', code: 429 }, '*');
                             throw new Error("Server sibuk. Rotasi API otomatis berjalan.");
                         }
+                        if (response.status === 400) throw new Error("API Key tidak valid.");
                         throw new Error(`HTTP Error ${response.status}`);
                     }
                     
@@ -155,10 +223,9 @@
             const handlePrint = () => { showToast("Menyiapkan dokumen..."); setTimeout(() => { window.print(); }, 1000); };
             const isKlinis = (kat) => kat === 'Klinis / Keselamatan Pasien';
 
-            // --- DATA STATES ASLI MANRISK ---
             const [profil, setProfil] = useState({ faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
             const [konteks, setKonteks] = useState([{ 
-                id: 1, klaster: 'LINTAS KLASTER', program: 'Gawat Darurat', kegiatan: 'Pelayanan IGD', rincian: 'Triase', 
+                id: 1, klaster: 'LINTAS KLASTER', program: 'Program 1: Gawat Darurat', kegiatan: 'Kegiatan: Pelayanan IGD', rincian: 'Triase', 
                 tujuan: 'Menilai tingkat kegawatdaruratan pasien dengan cepat', sasaran: 'Response time triase < 5 menit', aiGoalOptions: [] 
             }]);
             
@@ -177,7 +244,6 @@
 
             const [printFormType, setPrintFormType] = useState('SEMUA');
 
-            // --- FUNGSI SAVE/LOAD TXT ---
             const handleSaveDraft = () => {
                 const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify({ profil, konteks, risiko }, null, 2)], { type: "text/plain" }));
                 a.download = `draft-simr-${profil.tanggal}.txt`; a.click(); showToast("✅ Draft berhasil disimpan.");
@@ -194,7 +260,6 @@
                 }; reader.readAsText(file); e.target.value = ""; 
             };
 
-            // --- LOGIKA UPDATE PERHITUNGAN OTOMATIS (CORE LOGIC) ---
             const updateRisiko = (id, path, value) => {
                 setRisiko(prev => prev.map((r, index) => {
                     if (r.id !== id) return r;
@@ -242,7 +307,6 @@
                 }]);
             };
 
-            // --- AI ACTIONS ---
             const handleAIGoals = async (cId) => {
                 const c = konteks.find(x => x.id === cId);
                 if(!c.rincian) return showToast("⚠️ Pilih 'Rincian Unit' ILP terlebih dahulu.");
@@ -284,7 +348,7 @@
                 if(!r.identifikasi.pernyataan) return showToast("⚠️ Pernyataan Risiko kosong!");
                 showToast("⚡ AI membedah akar masalah (5-Why)...");
                 try {
-                    const res = await callGeminiJson(`Lakukan RCA mendalam 5-Why untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik/kebijakan.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Man/Money/Material/Method/Machine" } }, apiKey);
+                    const res = await callGeminiJson(`Lakukan RCA mendalam 5-Why untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Man/Money/Material/Method/Machine" } }, apiKey);
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, rca: res.rca } : item));
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
@@ -316,9 +380,7 @@
                 const r = risiko.find(x => x.id === rId);
                 showToast(`⚡ AI menyusun opsi ${phase}...`);
                 try {
-                    let p = phase === 'Realisasi' ? `3 tindakan nyata untuk rencana: "${r.rtp.uraian}".` 
-                          : phase === 'Hambatan' ? `3 hambatan saat merealisasikan: "${r.monitoring.realisasi}".` 
-                          : `3 usulan mengatasi hambatan: "${r.monitoring.hambatan}".`;
+                    let p = phase === 'Realisasi' ? `3 tindakan nyata untuk rencana: "${r.rtp.uraian}".` : phase === 'Hambatan' ? `3 hambatan saat merealisasikan: "${r.monitoring.realisasi}".` : `3 usulan mengatasi hambatan: "${r.monitoring.hambatan}".`;
                     const res = await callGeminiJson(p, { options: [{ teks: "string" }] }, apiKey);
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, [`ai${phase}Options`]: res.options } : item));
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
@@ -328,7 +390,6 @@
                 <div className="flex min-h-screen">
                     {toast && <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl font-bold border border-emerald-500 animate-pulse">{toast}</div>}
                     
-                    {/* SIDEBAR NAVIGATION */}
                     <aside className={`no-print ${isSidebarOpen ? 'w-72' : 'w-20'} bg-slate-900 text-slate-400 transition-all duration-300 flex flex-col h-screen sticky top-0 shrink-0 z-50`}>
                         <div className="p-6 text-white font-black text-xl flex items-center gap-3 border-b border-slate-800 relative">
                             <div className="bg-emerald-500 p-2 rounded-lg text-slate-900"><Icon name="BrainCircuit" /></div>
@@ -336,14 +397,7 @@
                         </div>
                         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="absolute -right-3 top-20 bg-emerald-500 text-white p-1 rounded-full border-2 border-white z-10"><Icon name={isSidebarOpen ? "ChevronLeft" : "ChevronRight"} className="w-4 h-4" /></button>
                         <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-                            {[
-                                { id: 1, label: 'Konteks ILP', icon: 'Building2' },
-                                { id: 2, label: 'Register (Form 1)', icon: 'AlertTriangle' },
-                                { id: 3, label: 'Akar Masalah (RCA)', icon: 'Search' },
-                                { id: 4, label: 'Profil (Form 2)', icon: 'Target' },
-                                { id: 6, label: 'Monitoring (Form 3)', icon: 'Activity' },
-                                { id: 7, label: 'Pusat Cetak', icon: 'Printer' }
-                            ].map(m => (
+                            {[{ id: 1, label: 'Konteks ILP', icon: 'Building2' }, { id: 2, label: 'Register (Form 1)', icon: 'AlertTriangle' }, { id: 3, label: 'Akar Masalah (RCA)', icon: 'Search' }, { id: 4, label: 'Profil (Form 2)', icon: 'Target' }, { id: 6, label: 'Monitoring (Form 3)', icon: 'Activity' }, { id: 7, label: 'Pusat Cetak', icon: 'Printer' }].map(m => (
                                 <button key={m.id} onClick={() => setStep(m.id)} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${step === m.id ? 'bg-emerald-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
                                     <Icon name={m.icon} />{isSidebarOpen && <span className="text-sm font-semibold">{m.label}</span>}
                                 </button>
@@ -354,7 +408,7 @@
                             <input type="file" accept=".txt" ref={fileInputRef} onChange={handleLoadDraft} className="hidden" />
                         </nav>
                         <div className="p-4 bg-slate-950 border-t border-slate-800 text-center">
-                            {isSidebarOpen ? <p className="text-[10px] text-emerald-500 font-mono">Mesin: Gemini 1.5 Flash Aktif</p> : <Icon name="Activity" className="text-emerald-500 mx-auto w-4 h-4"/>}
+                            {isSidebarOpen ? <p className="text-[10px] text-emerald-500 font-mono">Mesin AI Aktif</p> : <Icon name="Activity" className="text-emerald-500 mx-auto w-4 h-4"/>}
                         </div>
                     </aside>
                     
@@ -365,7 +419,6 @@
                         </header>
 
                         <div className="max-w-[1700px] mx-auto pb-24">
-                            {/* ALUR KERJA: STEP 1 (KONTEKS) */}
                             {step === 1 && (
                                 <div className="space-y-8 animate-in fade-in">
                                     <div className="bg-white p-8 rounded-3xl border-l-[12px] border-l-emerald-500 shadow-xl border">
@@ -385,40 +438,14 @@
                                         {konteks.map(k => (
                                             <div key={k.id} className="p-6 bg-slate-50 border rounded-3xl mb-10 relative group space-y-6">
                                                 <div className="grid md:grid-cols-3 gap-6">
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase">1. KLASTER</label>
-                                                        <select className="input-inline select-custom font-bold" value={k.klaster} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, klaster: e.target.value, program: '', kegiatan: '', rincian: ''}:x))}>
-                                                            <option value="">Pilih Klaster</option>{Object.keys(ILP_DATABASE).map(opt=><option key={opt}>{opt}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase">2. PROGRAM</label>
-                                                        <select className="input-inline select-custom font-bold" disabled={!k.klaster} value={k.program} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, program: e.target.value, kegiatan: '', rincian: ''}:x))}>
-                                                            <option value="">Pilih Program</option>{k.klaster && Object.keys(ILP_DATABASE[k.klaster] || {}).map(opt=><option key={opt}>{opt}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase">3. KEGIATAN</label>
-                                                        <select className="input-inline select-custom font-bold text-emerald-700" disabled={!k.program} value={k.kegiatan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, kegiatan: e.target.value, rincian: ''}:x))}>
-                                                            <option value="">Pilih Kegiatan</option>{k.program && Object.keys(ILP_DATABASE[k.klaster][k.program] || {}).map(opt=><option key={opt}>{opt}</option>)}
-                                                        </select>
-                                                    </div>
+                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">1. KLASTER</label><select className="input-inline select-custom font-bold" value={k.klaster} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, klaster: e.target.value, program: '', kegiatan: '', rincian: ''}:x))}><option value="">Pilih Klaster</option>{Object.keys(ILP_DATABASE).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">2. PROGRAM</label><select className="input-inline select-custom font-bold" disabled={!k.klaster} value={k.program} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, program: e.target.value, kegiatan: '', rincian: ''}:x))}><option value="">Pilih Program</option>{k.klaster && Object.keys(ILP_DATABASE[k.klaster] || {}).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">3. KEGIATAN</label><select className="input-inline select-custom font-bold text-emerald-700" disabled={!k.program} value={k.kegiatan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, kegiatan: e.target.value, rincian: ''}:x))}><option value="">Pilih Kegiatan</option>{k.program && Object.keys(ILP_DATABASE[k.klaster][k.program] || {}).map(opt=><option key={opt}>{opt}</option>)}</select></div>
                                                 </div>
                                                 <div className="grid md:grid-cols-4 gap-6 pt-4 border-t items-end">
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase">4. RINCIAN UNIT</label>
-                                                        <select className="input-inline font-black text-emerald-600 select-custom" disabled={!k.kegiatan} value={k.rincian} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, rincian: e.target.value}:x))}>
-                                                            <option value="">Pilih Rincian</option>{k.kegiatan && (ILP_DATABASE[k.klaster][k.program][k.kegiatan] || []).map(opt=><option key={opt}>{opt}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">TUJUAN STRATEGIS</label>
-                                                        <textarea className="input-inline italic text-xs h-12" value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} />
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN KINERJA</label>
-                                                        <textarea className="input-inline italic text-xs h-12" value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} />
-                                                    </div>
+                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">4. RINCIAN UNIT</label><select className="input-inline font-black text-emerald-600 select-custom" disabled={!k.kegiatan} value={k.rincian} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, rincian: e.target.value}:x))}><option value="">Pilih Rincian</option>{k.kegiatan && (ILP_DATABASE[k.klaster][k.program][k.kegiatan] || []).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">TUJUAN STRATEGIS</label><textarea className="input-inline italic text-xs h-12" value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} /></div>
+                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN KINERJA</label><textarea className="input-inline italic text-xs h-12" value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} /></div>
                                                     <button onClick={()=>handleAIGoals(k.id)} className="bg-blue-600 text-white p-3 rounded-2xl text-[10px] font-black flex items-center justify-center hover:scale-105 transition shadow"><Icon name="Sparkles" className="w-3 h-3 mr-2"/> SARAN AI</button>
                                                 </div>
                                                 {k.aiGoalOptions?.length > 0 && (
@@ -437,7 +464,6 @@
                                 </div>
                             )}
 
-                            {/* ALUR KERJA: STEP 2 (REGISTER F1) */}
                             {step === 2 && (
                                 <div className="space-y-6 animate-in fade-in">
                                     <div className="flex justify-between items-end"><h2 className="text-3xl font-black">Register Risiko (Form 1)</h2><button onClick={tambahRisiko} className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black hover:bg-emerald-700 shadow-lg">+ Baris Baru</button></div>
@@ -491,7 +517,6 @@
                                 </div>
                             )}
 
-                            {/* ALUR KERJA: STEP 3 (RCA) */}
                             {step === 3 && (
                                 <div className="space-y-6 animate-in fade-in">
                                     <h2 className="text-3xl font-black">Langkah 3: RCA (5-Why)</h2>
@@ -526,7 +551,6 @@
                                 </div>
                             )}
 
-                            {/* ALUR KERJA: STEP 4 (PROFIL & RTP) */}
                             {step === 4 && (
                                 <div className="space-y-6 animate-in fade-in">
                                     <h2 className="text-3xl font-black uppercase">Form 2: Profil & RTP</h2>
@@ -581,7 +605,6 @@
                                 </div>
                             )}
 
-                            {/* ALUR KERJA: STEP 6 (MONITORING F3) */}
                             {step === 6 && (
                                 <div className="space-y-6 animate-in fade-in">
                                     <h2 className="text-3xl font-black uppercase">Form 3: Pemantauan (Monitoring)</h2>
@@ -628,11 +651,10 @@
                                 </div>
                             )}
 
-                            {/* ALUR KERJA: STEP 7 (PRINT KEMENKES) */}
                             {step === 7 && (
                                 <div className="space-y-6 animate-in zoom-in duration-300">
                                     <div className="bg-emerald-900 p-8 rounded-3xl flex flex-col md:flex-row justify-between items-center text-white no-print shadow-2xl">
-                                        <div><h2 className="text-2xl font-black tracking-tight">Pusat Cetak Dokumen</h2><p className="text-emerald-200 text-xs">Gunakan Shortcut keyboard (Ctrl+P / Cmd+P) jika popup diblokir browser.</p></div>
+                                        <div><h2 className="text-2xl font-black tracking-tight">Pusat Cetak Dokumen</h2><p className="text-emerald-200 text-xs">Gunakan Shortcut (Ctrl+P / Cmd+P) jika popup diblokir browser.</p></div>
                                         <div className="flex gap-4 items-center mt-4 md:mt-0">
                                             <select className="p-3 text-slate-900 font-bold rounded-xl outline-none" value={printFormType} onChange={e=>setPrintFormType(e.target.value)}>
                                                 <option value="SEMUA">Cetak Semua Laporan</option>
@@ -646,9 +668,7 @@
                                         </div>
                                     </div>
 
-                                    {/* AREA CETAK (Disembunyikan di layar, khusus Print CSS) */}
                                     <div className="print-area text-black">
-                                        
                                         {(printFormType === 'SEMUA' || printFormType === 'REGISTER') && (
                                         <div className="bg-white p-6 border border-black print-section shadow-sm">
                                             <div className="kop-surat mb-6 uppercase">
@@ -661,7 +681,7 @@
                                                         <th rowSpan="2" className="border border-black">No</th><th rowSpan="2" className="border border-black">Kategori</th><th rowSpan="2" className="border border-black">Kegiatan</th><th rowSpan="2" className="border border-black">Sasaran</th><th colSpan="6" className="border border-black">Identifikasi Risiko</th><th rowSpan="2" className="border border-black">Kontrol Saat Ini</th><th colSpan="4" className="border border-black">Analisa (Inherent)</th><th colSpan="2" className="border border-black">Evaluasi</th>
                                                     </tr>
                                                     <tr className="bg-slate-50 text-[6px]">
-                                                        <th className="border border-black">Sumber</th><th className="border border-black">Sebab</th><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Dampak</th><th className="border border-black">Pernyataan</th><th className="border border-black w-3">D</th><th className="border border-black w-3">K</th><th className="border border-black w-3" title="Bobot Non-Klinis">B*</th><th className="border border-black">Skor</th><th className="border border-black">Selera</th><th className="border border-black">Mitigasi?</th>
+                                                        <th className="border border-black">Sumber</th><th className="border border-black">Sebab</th><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Dampak</th><th className="border border-black">Pernyataan</th><th className="border border-black w-3">D</th><th className="border border-black w-3">K</th><th className="border border-black w-3">B*</th><th className="border border-black">Skor</th><th className="border border-black">Selera</th><th className="border border-black">Mitigasi?</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
