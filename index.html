@@ -17,17 +17,12 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* CSS Print Spesifik untuk memperbaiki layout halaman dan Page Break */
         @media print {
             @page { size: landscape; margin: 0.5cm; }
             body, html, #root, .flex, .overflow-y-auto, .overflow-x-hidden, main, .min-h-screen {
-                display: block !important;
-                height: auto !important;
-                overflow: visible !important;
-                min-height: auto !important;
-                background: white !important;
+                display: block !important; height: auto !important; overflow: visible !important; min-height: auto !important; background: white !important;
             }
-            .no-print, aside, header, #loginOverlay, #userInfoFloating { display: none !important; }
+            .no-print, aside, header, #userInfoFloating { display: none !important; }
             main { padding: 0 !important; margin: 0 !important; width: 100% !important; overflow: visible !important; }
             .max-w-\\[1700px\\] { max-width: none !important; width: 100% !important; }
             .print-area { width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; }
@@ -43,194 +38,22 @@
 
         .input-inline { width: 100%; background: transparent; border: none; outline: none; padding: 4px; font-size: 0.8rem; border-bottom: 1px solid #e2e8f0; }
         .input-inline:focus { border-bottom: 2px solid #10b981; background: #f0fdf4; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
         .select-custom { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em; padding-right: 2rem; }
-        
-        /* CSS Anti Copy-Paste Sederhana untuk User Biasa */
-        .no-select {
-            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
-        }
+        .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     </style>
 </head>
 <body class="selection:bg-emerald-100">
 
-    <div id="loginOverlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900 transition-opacity duration-500 overflow-y-auto py-10">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center mx-4 relative overflow-hidden min-h-[480px]">
-            
-            <div id="loginFormView" class="absolute inset-0 p-8 transition-transform duration-500 transform translate-x-0 bg-white flex flex-col justify-center">
-                <i class="fas fa-shield-alt text-5xl text-emerald-600 mb-4"></i>
-                <h2 class="text-2xl font-black text-slate-800 mb-2">Akses Terbatas</h2>
-                <p class="text-sm text-slate-500 mb-6">Silakan masuk menggunakan akun yang telah di-ACC oleh Admin Dinas Kesehatan.</p>
-
-                <input type="email" id="loginEmail" placeholder="Email Anda" class="w-full border-slate-300 rounded-lg p-3 mb-4 focus:ring-emerald-500 bg-slate-50 border text-center font-bold outline-none">
-                <input type="password" id="loginPassword" placeholder="Password" class="w-full border-slate-300 rounded-lg p-3 mb-4 focus:ring-emerald-500 bg-slate-50 border text-center font-bold outline-none">
-
-                <button id="btnLogin" onclick="verifyLogin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-lg transition duration-200 shadow-md">
-                    <i class="fas fa-sign-in-alt"></i> Masuk SIMR Pro
-                </button>
-
-                <p id="loginError" class="text-red-600 text-sm mt-4 hidden bg-red-50 border border-red-100 py-2 px-3 rounded font-bold"></p>
-                <div class="mt-6 border-t border-slate-100 pt-4">
-                    <p class="text-sm text-slate-600 font-medium">Belum memiliki akun? <button onclick="toggleAuthView('register')" class="text-emerald-600 font-black hover:underline focus:outline-none">Daftar di sini</button></p>
-                </div>
-            </div>
-
-            <div id="registerFormView" class="absolute inset-0 p-8 transition-transform duration-500 transform translate-x-full bg-white flex flex-col justify-center">
-                <i class="fas fa-user-plus text-4xl text-emerald-600 mb-3"></i>
-                <h2 class="text-xl font-black text-slate-800 mb-1">Daftar Akun Baru</h2>
-                <p class="text-[11px] text-slate-500 mb-5 leading-tight font-medium">Akun baru wajib menunggu persetujuan Admin (ACC) sebelum bisa login.</p>
-
-                <div class="space-y-3 text-left">
-                    <div>
-                        <label class="block text-[11px] font-black text-slate-600 mb-1">NAMA INSTANSI / PUSKESMAS</label>
-                        <input type="text" id="regName" placeholder="Cth: Puskesmas..." class="w-full border-slate-300 rounded p-2 text-sm border font-medium outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-black text-slate-600 mb-1">EMAIL</label>
-                        <input type="email" id="regEmail" placeholder="Cth: puskesmas@gmail.com" class="w-full border-slate-300 rounded p-2 text-sm border font-medium outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-black text-slate-600 mb-1">PASSWORD (Min 6 Karakter)</label>
-                        <input type="password" id="regPassword" placeholder="Buat password baru" class="w-full border-slate-300 rounded p-2 text-sm border font-medium outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-
-                <button id="btnRegister" onclick="registerAccount()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-lg transition duration-200 mt-5 shadow-md text-sm">
-                    <i class="fas fa-paper-plane"></i> Kirim Pengajuan
-                </button>
-
-                <p id="regMessage" class="text-sm mt-3 hidden py-2 px-3 rounded font-bold"></p>
-                <div class="mt-4 border-t border-slate-100 pt-3">
-                    <p class="text-sm text-slate-600 font-medium">Sudah punya akun? <button onclick="toggleAuthView('login')" class="text-emerald-600 font-black hover:underline focus:outline-none">Ke Login</button></p>
-                </div>
-            </div>
+    <div id="mainAppWrapper" class="w-full min-h-screen no-select relative">
+        <div id="userInfoFloating" class="fixed top-4 right-4 z-[100] bg-white text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-emerald-200 flex items-center gap-2 no-print">
+            <i class="fas fa-shield-alt text-emerald-600"></i> <span id="displayUserName" class="text-slate-700 uppercase">Akses Portal Terenkripsi</span>
         </div>
-    </div>
-
-    <div id="mainAppWrapper" class="hidden opacity-0 transition-opacity duration-700 w-full min-h-screen no-select relative">
-        
-        <div id="userInfoFloating" class="fixed top-4 right-4 z-[100] bg-white text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-emerald-200 flex items-center gap-2 hidden no-print">
-            <i class="fas fa-user-check text-emerald-600"></i> <span id="displayUserName" class="text-slate-700 uppercase">Guest</span>
-            <span id="displaySisaHari" class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full ml-1 hidden"></span>
-        </div>
-
         <div id="root"></div>
-
     </div>
-
-    <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby0ZcYKoMyjtK-vy1qmfqia3Dcm5Xdkpuow2M9c95zvBAs7BFQwwsYoQCbn3cJX7sOIKQ/exec"; 
-
-        function toggleAuthView(view) {
-            const loginView = document.getElementById('loginFormView');
-            const regView = document.getElementById('registerFormView');
-            document.getElementById('loginError').classList.add('hidden');
-            document.getElementById('regMessage').classList.add('hidden');
-
-            if(view === 'register') {
-                loginView.classList.replace('translate-x-0', '-translate-x-full');
-                regView.classList.replace('translate-x-full', 'translate-x-0');
-            } else {
-                regView.classList.replace('translate-x-0', 'translate-x-full');
-                loginView.classList.replace('-translate-x-full', 'translate-x-0');
-            }
-        }
-
-        async function verifyLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.getElementById('btnLogin');
-            const err = document.getElementById('loginError');
-
-            if(!email || !password) {
-                err.innerText = "Email dan Password wajib diisi!"; err.classList.remove('hidden'); return;
-            }
-
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Memeriksa...`;
-            btn.disabled = true; err.classList.add('hidden');
-
-            try {
-                const response = await fetch(`${GAS_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
-                const result = await response.json();
-
-                if(result.status === 'success') {
-                    // Buka Tirai & Tampilkan Info User
-                    document.getElementById('loginOverlay').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('loginOverlay').classList.add('hidden');
-                        const app = document.getElementById('mainAppWrapper');
-                        app.classList.remove('hidden');
-                        void app.offsetWidth;
-                        app.classList.remove('opacity-0');
-                        
-                        document.getElementById('userInfoFloating').classList.remove('hidden');
-                        document.getElementById('displayUserName').innerText = result.name;
-                        
-                        if(result.sisaHari) {
-                            const badgeHari = document.getElementById('displaySisaHari');
-                            badgeHari.innerText = `${result.sisaHari} Hari`;
-                            badgeHari.classList.remove('hidden');
-                        }
-                    }, 500);
-                } else {
-                    err.innerText = result.message || "Akses Ditolak"; err.classList.remove('hidden');
-                }
-            } catch (error) {
-                err.innerText = "Koneksi gagal. Pastikan URL GAS sudah benar dan internet stabil."; err.classList.remove('hidden');
-            } finally {
-                btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Masuk SIMR Pro`; btn.disabled = false;
-            }
-        }
-
-        async function registerAccount() {
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const btn = document.getElementById('btnRegister');
-            const msg = document.getElementById('regMessage');
-
-            msg.className = "text-[11px] mt-3 py-2 px-2 rounded font-bold block";
-
-            if(!name || !email || !password || password.length < 6) {
-                msg.innerText = "Lengkapi data. Password min 6 karakter.";
-                msg.classList.add('bg-red-50', 'text-red-600', 'border', 'border-red-100'); return;
-            }
-
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Memproses...`;
-            btn.disabled = true; msg.classList.add('hidden');
-
-            try {
-                const response = await fetch(`${GAS_URL}?action=register&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`);
-                const result = await response.json();
-
-                if(result.status === 'success') {
-                    msg.innerText = result.message;
-                    msg.classList.add('bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
-                    document.getElementById('regName').value = ''; document.getElementById('regEmail').value = ''; document.getElementById('regPassword').value = '';
-                } else {
-                    msg.innerText = result.message;
-                    msg.classList.add('bg-red-50', 'text-red-600', 'border', 'border-red-100');
-                }
-            } catch (error) {
-                msg.innerText = "Gagal terhubung.";
-                msg.classList.add('bg-red-50', 'text-red-600', 'border', 'border-red-100');
-            } finally {
-                btn.innerHTML = `<i class="fas fa-paper-plane"></i> Kirim Pengajuan`; btn.disabled = false;
-            }
-        }
-        
-        // Anti klik kanan (Selektif)
-        document.addEventListener('contextmenu', event => {
-            if (event.target.closest('.no-select')) {
-                event.preventDefault();
-            }
-        });
-    </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICONS ---
         const Icon = ({ name, className = "w-5 h-5" }) => {
             const icons = {
                 Building2: <g><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></g>,
@@ -241,8 +64,6 @@
                 Trash2: <g><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></g>,
                 Printer: <g><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect height="8" width="12" x="6" y="14"/></g>,
                 BrainCircuit: <g><path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58 2.5 2.5 0 0 0 2.96 3.08 2.5 2.5 0 0 0 4.91.05L12 20V4.5Z"/><path d="M16 8V5c0-1.1.9-2 2-2"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/></g>,
-                Menu: <g><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></g>,
-                Activity: <g><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></g>,
                 ChevronLeft: <g><polyline points="15 18 9 12 15 6"/></g>,
                 ChevronRight: <g><polyline points="9 18 15 12 9 6"/></g>,
                 Sparkles: <g><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></g>,
@@ -251,7 +72,8 @@
                 Info: <g><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></g>,
                 CheckCircle: <g><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></g>,
                 Save: <g><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></g>,
-                Upload: <g><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></g>
+                Upload: <g><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></g>,
+                Activity: <g><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></g>
             };
             return (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -260,7 +82,6 @@
             );
         };
 
-        // --- DATABASE HIRARKI ILP ---
         const ILP_DATABASE = {
             "KLASTER 1: MANAJEMEN": {
                 "Penyelenggaraan Manajemen Puskesmas": {
@@ -360,14 +181,10 @@
             return `${prefix}-${String(index).padStart(2, '0')}`;
         };
 
-        // --- AI API ENGINE ---
         const callGeminiJson = async (prompt, schemaFormat, userApiKey) => {
             const apiKeyToUse = userApiKey || "";
-            if (!apiKeyToUse) throw new Error("Mohon masukkan API Key Google Gemini Anda di menu samping.");
-
-            // Daftar auto-fallback HANYA model flash (Model Pro dihilangkan)
+            if (!apiKeyToUse) throw new Error("API Key belum disinkronisasi dengan Portal.");
             const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
-
             const fullPrompt = `TUGAS: Anda adalah asisten pakar Manajemen Risiko Fasyankes. Berikan hasil HANYA dalam format JSON valid tanpa penjelasan apapun.\n\nSKEMA JSON:\n${JSON.stringify(schemaFormat, null, 2)}\n\nPERINTAH:\n${prompt}`;
             
             let lastError = "";
@@ -392,17 +209,9 @@
                         
                         if (!response.ok) {
                             lastError = data.error?.message || `HTTP Error ${response.status}`;
-                            
-                            if (response.status === 400 && lastError.toLowerCase().includes("api key not valid")) {
-                                throw new Error("API_KEY_INVALID"); 
-                            }
-                            if (response.status === 429) {
-                                isRateLimited = true;
-                                throw new Error("RATE_LIMIT");
-                            }
-                            if (response.status === 404) {
-                                throw new Error("NOT_FOUND");
-                            }
+                            if (response.status === 400 && lastError.toLowerCase().includes("api key not valid")) throw new Error("API_KEY_INVALID"); 
+                            if (response.status === 429) { isRateLimited = true; throw new Error("RATE_LIMIT"); }
+                            if (response.status === 404) throw new Error("NOT_FOUND");
                             throw new Error(lastError);
                         }
                         
@@ -412,42 +221,30 @@
                         window.dispatchEvent(new CustomEvent('model-detected', { detail: model }));
                         
                         let cleanJson = textResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
-                        const startObj = cleanJson.indexOf('{');
-                        const startArr = cleanJson.indexOf('[');
-                        const start = (startObj !== -1 && startArr !== -1) ? Math.min(startObj, startArr) : Math.max(startObj, startArr);
+                        const start = Math.max(cleanJson.indexOf('{'), cleanJson.indexOf('['));
+                        const end = Math.max(cleanJson.lastIndexOf('}'), cleanJson.lastIndexOf(']'));
                         
-                        const endObj = cleanJson.lastIndexOf('}');
-                        const endArr = cleanJson.lastIndexOf(']');
-                        const end = (endObj !== -1 && endArr !== -1) ? Math.max(endObj, endArr) : Math.max(endObj, endArr);
-                        
-                        if(start !== -1 && end !== -1) {
-                            cleanJson = cleanJson.substring(start, end + 1);
-                        }
-                        
+                        if(start !== -1 && end !== -1) cleanJson = cleanJson.substring(start, end + 1);
                         return JSON.parse(cleanJson); 
                     } catch (e) {
                         if (e.message === "API_KEY_INVALID") throw new Error("API Key tidak valid."); 
-                        if (e.message === "NOT_FOUND") break; // Langsung lompat ke model berikutnya tanpa retry
+                        if (e.message === "NOT_FOUND") break; 
                         
                         if (e.message === "RATE_LIMIT") {
                             lastError = "API sedang sibuk. Menunggu akses...";
+                            window.parent.postMessage({ type: 'API_ERROR', code: 429 }, '*');
                         } else {
                             lastError = e.message;
                         }
                         
                         if (retry < 2) { 
-                            // Terhenti sesaat / jeda eksponensial menunggu akses API sesuai logika asli Anda
                             await new Promise(res => setTimeout(res, delay)); 
                             delay *= 2; 
                         }
                     }
                 }
             }
-            
-            // Jika semua model gagal setelah proses jeda dan fallback
-            if (isRateLimited) {
-                throw new Error("Limit Quota / Server Sibuk. Mohon jeda 1 menit lalu klik tombol lagi.");
-            }
+            if (isRateLimited) throw new Error("Limit Quota. Dashboard akan mencoba merotasi key.");
             throw new Error(lastError || "Koneksi ke AI bermasalah.");
         };
 
@@ -456,9 +253,18 @@
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [toast, setToast] = useState("");
             
-            const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('simr_key') || '');
-            const [apiKey, setApiKey] = useState(() => localStorage.getItem('simr_key') || '');
-            const [activeModel, setActiveModel] = useState(apiKey ? 'Menunggu AI...' : 'API Key Kosong');
+            // Tangkap Parameter URL langsung saat App di-render
+            const urlParams = new URLSearchParams(window.location.search);
+            const keyFromUrl = urlParams.get('key');
+            if (keyFromUrl) {
+                sessionStorage.setItem('sehati_api_key', keyFromUrl);
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+            }
+
+            const [apiKeyInput, setApiKeyInput] = useState(() => sessionStorage.getItem('sehati_api_key') || localStorage.getItem('simr_key') || '');
+            const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('sehati_api_key') || localStorage.getItem('simr_key') || '');
+            const [activeModel, setActiveModel] = useState(apiKey ? 'API Terkoneksi' : 'API Key Kosong');
 
             const fileInputRef = useRef(null);
 
@@ -471,62 +277,52 @@
             const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 6000); };
 
             const handlePrint = () => {
-                showToast("Membuka PDF... Jika dialog tidak otomatis muncul, tekan Ctrl+P (Windows) atau Cmd+P (Mac).");
-                setTimeout(() => {
-                    try { window.print(); } catch (e) { console.error("Print blocked", e); }
-                }, 1000);
+                showToast("Membuka PDF... Tekan Ctrl+P jika dialog tidak muncul.");
+                setTimeout(() => { try { window.print(); } catch (e) { console.error(e); } }, 1000);
             };
 
             const simpanApiKey = () => {
-                if (apiKeyInput && !apiKeyInput.startsWith("AIza")) {
-                    return showToast("⚠️ Format API Key Salah. Pastikan diawali AIza.");
-                }
+                if (apiKeyInput && !apiKeyInput.startsWith("AIza")) return showToast("⚠️ Format API Key Salah.");
                 setApiKey(apiKeyInput);
                 localStorage.setItem('simr_key', apiKeyInput);
                 setActiveModel('Menunggu AI...');
                 showToast("✓ Pengaturan AI berhasil disimpan!");
             };
 
-            // --- DATA STATES ---
-            const [profil, setProfil] = useState({ faskes: 'Puskesmas Percontohan', pimpinan: 'dr. Nama Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
+            const [profil, setProfil] = useState({ faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
             const [konteks, setKonteks] = useState([{ 
-                id: 1, klaster: 'LINTAS KLASTER', program: 'Gawat Darurat', kegiatan: 'Pelayanan IGD', rincian: '1. Triase.', 
+                id: 1, klaster: 'LINTAS KLASTER', program: 'Gawat Darurat', kegiatan: 'Pelayanan IGD', rincian: 'Triase', 
                 tujuan: 'Menilai tingkat kegawatdaruratan pasien dengan cepat', sasaran: 'Response time triase < 5 menit', aiGoalOptions: [] 
             }]);
             
             const [risiko, setRisiko] = useState([
                 {
                     id: 1, idKonteks: 1, kategori: 'Operasional', area: 'Ruang Triase',
-                    identifikasi: { sumber: 'Internal', sebab: 'Sistem SIMPUS lambat', kode: 'OPE-01', risiko: 'Keterlambatan input rekam medis', dampak: 'Penumpukan pasien', pernyataan: 'Sistem SIMPUS yang lambat menyebabkan keterlambatan input rekam medis sehingga terjadi penumpukan pasien.' },
+                    identifikasi: { sumber: 'Internal', sebab: 'Sistem SIMPUS lambat', kode: 'OPE-01', risiko: 'Keterlambatan input rekam medis', dampak: 'Penumpukan pasien', pernyataan: 'Sistem SIMPUS lambat menyebabkan keterlambatan input rekam medis sehingga terjadi penumpukan pasien.' },
                     analisa: { pengendalian: 'SOP Manual Cadangan', d: 3, k: 3, b: 5, skor: 9, tingkat: 'SEDANG' },
                     evaluasi: { selera: 'Diatas selera risiko', perluPenanganan: 'Ya' },
-                    rca: { w1: 'Server SIMPUS overload', w2: 'Kapasitas server kecil', w3: 'Anggaran upgrade belum turun', w4: '', w5: '', akar: 'Keterbatasan anggaran infrastruktur IT', jenis: 'Money/Machine' },
-                    rtp: { opsi: 'Reduksi kerugian', biaya: 'Retensi', uraian: 'Pengajuan revisi anggaran BLUD untuk server', waktu: '1 bulan', rd: 2, rk: 2, rb: 5, rskor: 4, rtingkat: 'RENDAH', pemilik: 'PJ Mutu / Kepala Tata Usaha', pengelola: 'Tim IT' },
-                    monitoring: { realisasi: 'Proposal sudah diajukan', hambatan: 'Menunggu persetujuan Dinkes', usulan: 'Audiensi langsung ke Dinkes', md: 2, mk: 2, mb: 5, mskor: 4, mtingkat: 'RENDAH', mselera: 'Dibawah selera risiko', trend: 'Turun', efektivitas: 'Efektif' },
+                    rca: { w1: 'Server overload', w2: 'Kapasitas server kecil', w3: 'Anggaran upgrade belum turun', w4: '', w5: '', akar: 'Keterbatasan anggaran infrastruktur IT', jenis: 'Money/Machine' },
+                    rtp: { opsi: 'Reduksi kerugian', biaya: 'Retensi', uraian: 'Pengajuan revisi anggaran BLUD', waktu: '1 bulan', rd: 2, rk: 2, rb: 5, rskor: 4, rtingkat: 'RENDAH', pemilik: 'PJ Mutu / Kepala Tata Usaha', pengelola: 'Tim IT' },
+                    monitoring: { realisasi: 'Proposal diajukan', hambatan: 'Menunggu persetujuan', usulan: 'Audiensi Dinkes', md: 2, mk: 2, mb: 5, mskor: 4, mtingkat: 'RENDAH', mselera: 'Dibawah selera risiko', trend: 'Turun', efektivitas: 'Efektif' },
                     aiRiskOptions: [], aiRtpOptions: [], aiRealisasiOptions: [], aiHambatanOptions: [], aiUsulanOptions: []
                 }
             ]);
 
             const [printFormType, setPrintFormType] = useState('SEMUA');
 
-            // --- FITUR SIMPAN & MUAT DRAFT ---
             const handleSaveDraft = () => {
                 const data = { profil, konteks, risiko };
-                const jsonStr = JSON.stringify(data, null, 2);
-                const blob = new Blob([jsonStr], { type: "text/plain" });
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "text/plain" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
-                a.href = url;
-                a.download = `draft-simr-${profil.tanggal}.txt`;
-                a.click();
+                a.href = url; a.download = `draft-simr-${profil.tanggal}.txt`; a.click();
                 URL.revokeObjectURL(url);
-                showToast("✅ Draft berhasil disimpan ke format TXT.");
+                showToast("✅ Draft berhasil disimpan.");
             };
 
             const handleLoadDraft = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     try {
@@ -534,117 +330,45 @@
                         if (data.profil) setProfil(data.profil);
                         if (data.konteks) setKonteks(data.konteks);
                         if (data.risiko) setRisiko(data.risiko);
-                        showToast("✅ Draft berhasil dimuat dan data telah diperbarui.");
-                    } catch (error) {
-                        showToast("❌ File draft tidak valid atau rusak.");
-                    }
+                        showToast("✅ Draft berhasil dimuat.");
+                    } catch (error) { showToast("❌ File draft rusak."); }
                 };
                 reader.readAsText(file);
-                e.target.value = ""; // Reset input after reading
+                e.target.value = ""; 
             };
 
             const isKlinis = (kat) => kat === 'Klinis / Keselamatan Pasien';
 
             const updateRisiko = (id, path, value) => {
-                setRisiko(prev => {
-                    return prev.map((r, index) => {
-                        if (r.id !== id) return r;
-                        const newR = JSON.parse(JSON.stringify(r)); 
-                        const parts = path.split('.');
-                        let curr = newR;
-                        
-                        for (let i = 0; i < parts.length - 1; i++) curr = curr[parts[i]];
-                        curr[parts[parts.length - 1]] = value;
-
-                        if (path === 'kategori') {
-                            newR.identifikasi.kode = generateKode(value, index + 1);
-                            if(isKlinis(value)) newR.analisa.b = 1; 
-                        }
-
-                        let skorChanged = false;
-
-                        if (path.includes('analisa')) {
-                            newR.analisa.skor = (parseInt(newR.analisa.d) || 0) * (parseInt(newR.analisa.k) || 0);
-                            newR.analisa.tingkat = getTingkat(newR.analisa.skor).label;
-                            
-                            if (newR.analisa.skor >= 8) {
-                                newR.evaluasi.selera = "Diatas selera risiko";
-                                newR.evaluasi.perluPenanganan = "Ya";
-                            } else {
-                                newR.evaluasi.selera = "Dibawah selera risiko";
-                                newR.evaluasi.perluPenanganan = "Tidak";
-                            }
-                            skorChanged = true;
-                        }
-                        
-                        if (path.includes('rtp') && (path.includes('rd') || path.includes('rk'))) {
-                            newR.rtp.rskor = (parseInt(newR.rtp.rd) || 0) * (parseInt(newR.rtp.rk) || 0);
-                            newR.rtp.rtingkat = getTingkat(newR.rtp.rskor).label;
-                            skorChanged = true;
-                        }
-
-                        // AUTO UPDATE TREND DAN EFEKTIVITAS BERDASARKAN INHERENT VS RESIDUAL
-                        if (skorChanged && newR.analisa.skor > 0 && newR.rtp.rskor > 0) {
-                            if (newR.rtp.rskor < newR.analisa.skor) {
-                                newR.monitoring.trend = "Turun";
-                                newR.monitoring.efektivitas = "Efektif";
-                            } else if (newR.rtp.rskor === newR.analisa.skor) {
-                                newR.monitoring.trend = "Tetap";
-                                newR.monitoring.efektivitas = "Sebagian Efektif";
-                            } else {
-                                newR.monitoring.trend = "Naik";
-                                newR.monitoring.efektivitas = "Tidak Efektif";
-                            }
-                        }
-
-                        return newR;
-                    });
-                });
-            };
-
-            const tambahRisiko = () => {
-                const newId = Date.now();
-                const idx = risiko.length + 1;
-                setRisiko([...risiko, {
-                    id: newId, idKonteks: '', kategori: '', area: '',
-                    identifikasi: { sumber: '', sebab: '', kode: '', risiko: '', dampak: '', pernyataan: '' },
-                    analisa: { pengendalian: '', d: 1, k: 1, b: 1, skor: 1, tingkat: 'SANGAT RENDAH' },
-                    evaluasi: { selera: 'Dibawah selera risiko', perluPenanganan: 'Tidak' },
-                    rca: { w1: '', w2: '', w3: '', w4: '', w5: '', akar: '', jenis: '' },
-                    rtp: { opsi: '', biaya: '', uraian: '', waktu: '', rd: 1, rk: 1, rb: 1, rskor: 1, rtingkat: 'SANGAT RENDAH', pemilik: 'Kepala Unit / PJ Mutu', pengelola: '' },
-                    monitoring: { realisasi: '', hambatan: '', usulan: '', md: 1, mk: 1, mb: 1, mskor: 1, mtingkat: 'SANGAT RENDAH', mselera: 'Dibawah selera risiko', trend: 'Tetap', efektivitas: '' },
-                    aiRiskOptions: [], aiRtpOptions: [], aiRealisasiOptions: [], aiHambatanOptions: [], aiUsulanOptions: []
-                }]);
-            };
-
-            const applyAiRiskOption = (rId, opt) => {
                 setRisiko(prev => prev.map((r, index) => {
-                    if (r.id !== rId) return r;
-                    const newR = JSON.parse(JSON.stringify(r));
+                    if (r.id !== id) return r;
+                    const newR = JSON.parse(JSON.stringify(r)); 
+                    const parts = path.split('.');
+                    let curr = newR;
                     
-                    newR.kategori = opt.kategori || newR.kategori;
-                    newR.identifikasi.kode = generateKode(newR.kategori, index + 1);
-                    newR.identifikasi.sumber = opt.sumber;
-                    newR.identifikasi.sebab = opt.sebab;
-                    newR.identifikasi.risiko = opt.risiko;
-                    newR.identifikasi.dampak = opt.dampak;
-                    newR.identifikasi.pernyataan = opt.pernyataan;
-                    newR.analisa.pengendalian = opt.pengendalian;
-                    newR.analisa.d = opt.d;
-                    newR.analisa.k = opt.k;
-                    newR.analisa.b = isKlinis(newR.kategori) ? 1 : (opt.b || 5);
-                    
-                    newR.analisa.skor = (parseInt(opt.d) || 0) * (parseInt(opt.k) || 0);
-                    newR.analisa.tingkat = getTingkat(newR.analisa.skor).label;
-                    if (newR.analisa.skor >= 8) {
-                        newR.evaluasi.selera = "Diatas selera risiko";
-                        newR.evaluasi.perluPenanganan = "Ya";
-                    } else {
-                        newR.evaluasi.selera = "Dibawah selera risiko";
-                        newR.evaluasi.perluPenanganan = "Tidak";
+                    for (let i = 0; i < parts.length - 1; i++) curr = curr[parts[i]];
+                    curr[parts[parts.length - 1]] = value;
+
+                    if (path === 'kategori') {
+                        newR.identifikasi.kode = generateKode(value, index + 1);
+                        if(isKlinis(value)) newR.analisa.b = 1; 
                     }
 
-                    if (newR.analisa.skor > 0 && newR.rtp.rskor > 0) {
+                    let skorChanged = false;
+                    if (path.includes('analisa')) {
+                        newR.analisa.skor = (parseInt(newR.analisa.d) || 0) * (parseInt(newR.analisa.k) || 0);
+                        newR.analisa.tingkat = getTingkat(newR.analisa.skor).label;
+                        newR.evaluasi.selera = newR.analisa.skor >= 8 ? "Diatas selera risiko" : "Dibawah selera risiko";
+                        newR.evaluasi.perluPenanganan = newR.analisa.skor >= 8 ? "Ya" : "Tidak";
+                        skorChanged = true;
+                    }
+                    if (path.includes('rtp') && (path.includes('rd') || path.includes('rk'))) {
+                        newR.rtp.rskor = (parseInt(newR.rtp.rd) || 0) * (parseInt(newR.rtp.rk) || 0);
+                        newR.rtp.rtingkat = getTingkat(newR.rtp.rskor).label;
+                        skorChanged = true;
+                    }
+
+                    if (skorChanged && newR.analisa.skor > 0 && newR.rtp.rskor > 0) {
                         if (newR.rtp.rskor < newR.analisa.skor) {
                             newR.monitoring.trend = "Turun"; newR.monitoring.efektivitas = "Efektif";
                         } else if (newR.rtp.rskor === newR.analisa.skor) {
@@ -653,7 +377,36 @@
                             newR.monitoring.trend = "Naik"; newR.monitoring.efektivitas = "Tidak Efektif";
                         }
                     }
+                    return newR;
+                }));
+            };
 
+            const tambahRisiko = () => {
+                setRisiko([...risiko, {
+                    id: Date.now(), idKonteks: '', kategori: '', area: '',
+                    identifikasi: { sumber: '', sebab: '', kode: '', risiko: '', dampak: '', pernyataan: '' },
+                    analisa: { pengendalian: '', d: 1, k: 1, b: 1, skor: 1, tingkat: 'SANGAT RENDAH' },
+                    evaluasi: { selera: 'Dibawah selera risiko', perluPenanganan: 'Tidak' },
+                    rca: { w1: '', w2: '', w3: '', w4: '', w5: '', akar: '', jenis: '' },
+                    rtp: { opsi: '', biaya: '', uraian: '', waktu: '', rd: 1, rk: 1, rb: 1, rskor: 1, rtingkat: 'SANGAT RENDAH', pemilik: 'PJ Mutu', pengelola: '' },
+                    monitoring: { realisasi: '', hambatan: '', usulan: '', trend: 'Tetap', efektivitas: '' },
+                    aiRiskOptions: [], aiRtpOptions: [], aiRealisasiOptions: [], aiHambatanOptions: [], aiUsulanOptions: []
+                }]);
+            };
+
+            const applyAiRiskOption = (rId, opt) => {
+                setRisiko(prev => prev.map((r, index) => {
+                    if (r.id !== rId) return r;
+                    const newR = JSON.parse(JSON.stringify(r));
+                    newR.kategori = opt.kategori || newR.kategori;
+                    newR.identifikasi.kode = generateKode(newR.kategori, index + 1);
+                    newR.identifikasi.sumber = opt.sumber; newR.identifikasi.sebab = opt.sebab;
+                    newR.identifikasi.risiko = opt.risiko; newR.identifikasi.dampak = opt.dampak;
+                    newR.identifikasi.pernyataan = opt.pernyataan; newR.analisa.pengendalian = opt.pengendalian;
+                    newR.analisa.d = opt.d; newR.analisa.k = opt.k; newR.analisa.b = isKlinis(newR.kategori) ? 1 : (opt.b || 5);
+                    newR.analisa.skor = (parseInt(opt.d) || 0) * (parseInt(opt.k) || 0);
+                    newR.evaluasi.selera = newR.analisa.skor >= 8 ? "Diatas selera risiko" : "Dibawah selera risiko";
+                    newR.evaluasi.perluPenanganan = newR.analisa.skor >= 8 ? "Ya" : "Tidak";
                     newR.aiRiskOptions = [];
                     return newR;
                 }));
@@ -665,51 +418,34 @@
                     const newR = JSON.parse(JSON.stringify(r));
                     newR.rtp = { ...newR.rtp, ...opt };
                     newR.rtp.rskor = (parseInt(opt.rd) || 0) * (parseInt(opt.rk) || 0);
-                    newR.rtp.rtingkat = getTingkat(newR.rtp.rskor).label;
-                    
                     if (newR.analisa.skor > 0 && newR.rtp.rskor > 0) {
-                        if (newR.rtp.rskor < newR.analisa.skor) {
-                            newR.monitoring.trend = "Turun"; newR.monitoring.efektivitas = "Efektif";
-                        } else if (newR.rtp.rskor === newR.analisa.skor) {
-                            newR.monitoring.trend = "Tetap"; newR.monitoring.efektivitas = "Sebagian Efektif";
-                        } else {
-                            newR.monitoring.trend = "Naik"; newR.monitoring.efektivitas = "Tidak Efektif";
-                        }
+                        newR.monitoring.trend = newR.rtp.rskor < newR.analisa.skor ? "Turun" : newR.rtp.rskor === newR.analisa.skor ? "Tetap" : "Naik";
+                        newR.monitoring.efektivitas = newR.rtp.rskor < newR.analisa.skor ? "Efektif" : newR.rtp.rskor === newR.analisa.skor ? "Sebagian Efektif" : "Tidak Efektif";
                     }
                     newR.aiRtpOptions = [];
                     return newR;
                 }));
             };
 
-            // --- AI ACTIONS ---
             const handleAIGoals = async (cId) => {
                 const c = konteks.find(x => x.id === cId);
                 if(!c.rincian) return showToast("⚠️ Pilih 'Rincian Unit' ILP terlebih dahulu.");
                 showToast("⚡ AI sedang merangkum pilihan sasaran...");
                 try {
-                    const schema = { options: [{ tujuan: "string", sasaran: "string" }] };
-                    const res = await callGeminiJson(`Berikan 3 pilihan variasi 'Tujuan Strategis Mutu' dan 'Sasaran Mutu Kinerja' yang sangat spesifik dan terukur untuk kegiatan "${c.rincian}" di Fasyankes Tingkat Pertama (Puskesmas).`, schema, apiKey);
+                    const res = await callGeminiJson(`Berikan 3 variasi Tujuan dan Sasaran Mutu Kinerja spesifik untuk kegiatan "${c.rincian}" Puskesmas.`, { options: [{ tujuan: "string", sasaran: "string" }] }, apiKey);
                     setKonteks(konteks.map(x => x.id === cId ? { ...x, aiGoalOptions: res.options } : x));
-                    showToast("✅ Berhasil. Silakan pilih saran di bawah.");
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
 
             const handleAIGenerateRisks = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.idKonteks) return showToast("⚠️ Anda harus memilih 'Konteks Unit (Pilih)' pada baris ini terlebih dahulu.");
+                if(!r.idKonteks || !r.kategori) return showToast("⚠️ Pilih 'Konteks Unit' & 'Kategori Risiko'.");
                 const c = konteks.find(ctx => ctx.id === r.idKonteks);
-                if(!r.kategori) return showToast("⚠️ Anda harus memilih 'Kategori Risiko' terlebih dahulu.");
-                
                 showToast("⚡ AI menyusun opsi identifikasi risiko...");
                 try {
-                    const panduanBobot = isKlinis(r.kategori) 
-                        ? "Karena ini kategori Klinis, biarkan b=1." 
-                        : "Karena ini Non-Klinis, berikan estimasi Bobot (b) antara angka 1-5 berdasarkan dampak finansial/reputasi/hukum.";
-
-                    const schema = { options: [{ sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Narasi: Sebab -> Risiko -> Dampak", d: "angka 1-5", k: "angka 1-5", b: "angka 1-5", pengendalian: "string" }] };
-                    const res = await callGeminiJson(`Buat 3 opsi identifikasi risiko berbeda KHUSUS untuk kategori "${r.kategori}" pada kegiatan "${c.rincian}" sasaran "${c.sasaran}". \n${panduanBobot}`, schema, apiKey);
+                    const panduan = isKlinis(r.kategori) ? "Klinis b=1." : "Non-Klinis b=1-5.";
+                    const res = await callGeminiJson(`Buat 3 opsi identifikasi risiko KHUSUS kategori "${r.kategori}" kegiatan "${c.rincian}" sasaran "${c.sasaran}". \n${panduan}`, { options: [{ sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] }, apiKey);
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRiskOptions: res.options } : item));
-                    showToast("✅ AI Selesai. Silakan pilih opsi risiko.");
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
 
@@ -718,140 +454,84 @@
                 if(!r.identifikasi.pernyataan) return showToast("⚠️ Pernyataan Risiko kosong!");
                 showToast("⚡ AI membedah akar masalah (5-Why)...");
                 try {
-                    const schema = { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Pilih 1: Man/Material/Machine/Method/Kebijakan/Lingkungan" } };
-                    
-                    // PEMBARUAN PROMPT UNTUK MEMPERTAJAM PENCARIAN PENYEBAB SISTEMIK
-                    const res = await callGeminiJson(`Lakukan bedah 5-Why RCA secara kritis dan mendalam untuk pernyataan risiko: "${r.identifikasi.pernyataan}". ATURAN: Jangan berhenti pada sekadar "human error" atau "kurang dana". Gali terus hingga bermuara pada kegagalan sistemik (kelemahan pada proses, prosedur, pengawasan, desain sistem, atau kebijakan manajemen). Tarik kesimpulan akar masalah sistemiknya dengan tajam, dan klasifikasikan jenis penyebabnya secara presisi.`, schema, apiKey);
-                    
+                    const res = await callGeminiJson(`Lakukan RCA mendalam untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik/kebijakan.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "string" } }, apiKey);
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, rca: res.rca } : item));
-                    showToast("✅ Analisis RCA Selesai.");
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
 
             const handleAIRTP = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.rca.akar) return showToast("⚠️ Lakukan RCA (Langkah 3) terlebih dahulu!");
-                showToast("⚡ AI menyusun opsi saran penanganan (RTP)...");
+                if(!r.rca.akar) return showToast("⚠️ Lakukan RCA dahulu!");
+                showToast("⚡ AI menyusun opsi saran RTP...");
                 try {
-                    const schema = { options: [{ opsi: "Pilih 1: Reduksi kerugian/Cegah kerugian/Segregasi/Contractual Transfer/Hindari risiko", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "angka 1-5", rk: "angka 1-5", pemilik: "Saran Jabatan SOTK Pemilik Risiko (cth: PJ Mutu/Kepala Ruangan/Kepala Puskesmas)", pengelola: "string" }] };
-                    const res = await callGeminiJson(`Beri 3 variasi saran rencana penanganan risiko (RTP) untuk mengatasi akar masalah: "${r.rca.akar}" pada risiko "${r.identifikasi.risiko}". Buatlah opsi berbeda.`, schema, apiKey);
+                    const res = await callGeminiJson(`Beri 3 saran rencana penanganan (RTP) mengatasi akar masalah: "${r.rca.akar}".`, { options: [{ opsi: "Pilih 1 Opsi", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan", pengelola: "string" }] }, apiKey);
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRtpOptions: res.options } : item));
-                    showToast("✅ Berhasil. Silakan pilih saran RTP.");
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
 
             const handleAIMonitoring = async (rId, phase) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.rtp.uraian) return showToast("⚠️ Lengkapi RTP (Langkah 4) terlebih dahulu!");
-                showToast(`⚡ AI menyusun opsi saran ${phase}...`);
+                showToast(`⚡ AI menyusun opsi ${phase}...`);
                 try {
-                    let prompt = "";
-                    const schema = { options: [{ teks: "string" }] };
-                    
-                    if(phase === 'Realisasi') {
-                        prompt = `Berikan 3 contoh opsi realisasi spesifik (tindakan nyata) berdasarkan rencana penanganan: "${r.rtp.uraian}" untuk mengatasi risiko "${r.identifikasi.risiko}".`;
-                    } 
-                    else if (phase === 'Hambatan') {
-                        prompt = `Berikan 3 prediksi hambatan/kendala nyata yang sering muncul saat mencoba merealisasikan: "${r.monitoring.realisasi}".`;
-                    }
-                    else if (phase === 'Usulan') {
-                        prompt = `Berikan 3 opsi usulan / Rencana Tindak Lanjut (RTL) spesifik untuk mengatasi hambatan: "${r.monitoring.hambatan}".`;
-                    }
-                    
-                    const res = await callGeminiJson(prompt, schema, apiKey);
-                    
-                    if(phase === 'Realisasi') {
-                        setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRealisasiOptions: res.options, aiHambatanOptions: [], aiUsulanOptions: [] } : item));
-                    } else if (phase === 'Hambatan') {
-                        setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiHambatanOptions: res.options, aiRealisasiOptions: [], aiUsulanOptions: [] } : item));
-                    } else {
-                        setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiUsulanOptions: res.options, aiRealisasiOptions: [], aiHambatanOptions: [] } : item));
-                    }
-                    showToast(`✅ Selesai. Silakan pilih saran ${phase}.`);
+                    let p = phase === 'Realisasi' ? `3 opsi tindakan nyata untuk rencana: "${r.rtp.uraian}".` 
+                          : phase === 'Hambatan' ? `3 hambatan saat merealisasikan: "${r.monitoring.realisasi}".` 
+                          : `3 usulan mengatasi hambatan: "${r.monitoring.hambatan}".`;
+                    const res = await callGeminiJson(p, { options: [{ teks: "string" }] }, apiKey);
+                    setRisiko(prev => prev.map(item => item.id === rId ? { ...item, [`ai${phase}Options`]: res.options } : item));
                 } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
             };
 
-            // --- VIEW COMPONENTS ---
-            const renderSidebar = () => (
-                <aside className={`no-print ${isSidebarOpen ? 'w-72' : 'w-20'} bg-slate-900 text-slate-400 transition-all duration-300 flex flex-col h-screen sticky top-0 shrink-0 z-50`}>
-                    <div className="p-6 text-white font-black text-xl flex items-center gap-3 border-b border-slate-800 relative overflow-hidden">
-                        <div className="bg-emerald-500 p-2 rounded-lg text-slate-900 shrink-0 shadow-lg"><Icon name="BrainCircuit" /></div>
-                        {isSidebarOpen && <span className="tracking-tighter truncate uppercase">SIMR AI PRO</span>}
-                    </div>
-                    
-                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="absolute -right-3 top-20 bg-emerald-500 text-white p-1 rounded-full shadow-lg border-2 border-white hover:scale-110 transition-transform z-10">
-                        <Icon name={isSidebarOpen ? "ChevronLeft" : "ChevronRight"} className="w-4 h-4" />
-                    </button>
-
-                    <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto custom-scrollbar">
-                        {[
-                            { id: 1, label: 'Konteks ILP', icon: 'Building2' },
-                            { id: 2, label: 'Register (Form 1)', icon: 'AlertTriangle' },
-                            { id: 3, label: 'Akar Masalah (RCA)', icon: 'Search' },
-                            { id: 4, label: 'Profil (Form 2)', icon: 'Target' },
-                            { id: 6, label: 'Monitoring (Form 3)', icon: 'Activity' },
-                            { id: 7, label: 'Pusat Cetak', icon: 'Printer' }
-                        ].map(m => (
-                            <button key={m.id} onClick={() => setStep(m.id)} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${step === m.id ? 'bg-emerald-600 text-white shadow-xl' : 'hover:bg-slate-800'}`}>
-                                <Icon name={m.icon} />
-                                {isSidebarOpen && <span className="text-sm font-semibold truncate">{m.label}</span>}
-                            </button>
-                        ))}
-                        
-                        <hr className="border-slate-800 my-2 mx-3" />
-                        
-                        <button onClick={handleSaveDraft} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all hover:bg-slate-800 text-blue-400`}>
-                            <Icon name="Save" />
-                            {isSidebarOpen && <span className="text-sm font-semibold truncate">Simpan Draft (.txt)</span>}
-                        </button>
-                        <button onClick={() => fileInputRef.current.click()} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all hover:bg-slate-800 text-yellow-400`}>
-                            <Icon name="Upload" />
-                            {isSidebarOpen && <span className="text-sm font-semibold truncate">Muat Draft (.txt)</span>}
-                        </button>
-                        <input type="file" accept=".txt" ref={fileInputRef} onChange={handleLoadDraft} className="hidden" />
-                    </nav>
-
-                    <div className="p-4 bg-slate-950 border-t border-slate-800 shrink-0">
-                        {isSidebarOpen ? (
-                            <>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="text-[10px] font-bold text-emerald-400 uppercase flex items-center"><Icon name="Key" className="w-3 h-3 mr-1" /> API Key Pribadi</label>
-                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-[9px] text-blue-400 hover:text-blue-300 flex items-center bg-slate-900 px-2 py-0.5 rounded border border-slate-800 transition-colors" title="Buka Google AI Studio">Dapatkan <Icon name="ExternalLink" className="w-2.5 h-2.5 ml-1" /></a>
-                                </div>
-                                <div className="flex items-center gap-2 mb-2">
-                                  <input type="password" value={apiKeyInput} onChange={e => setApiKeyInput(e.target.value)} placeholder="Wajib jika standalone..." className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-400" />
-                                  <button onClick={simpanApiKey} className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-xs font-bold transition">Save</button>
-                                </div>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <div className="bg-emerald-500/20 p-1 rounded-full"><Icon name="CheckCircle" className="w-3 h-3 text-emerald-500" /></div>
-                                    <p className="text-[9px] text-emerald-500 truncate">Status AI: {activeModel}</p>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex justify-center" onClick={() => setIsSidebarOpen(true)}>
-                                <Icon name="Key" className="text-emerald-500 cursor-pointer hover:text-emerald-400" />
-                            </div>
-                        )}
-                    </div>
-                </aside>
-            );
-
             return (
                 <div className="flex min-h-screen">
-                    {toast && <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl font-bold border border-emerald-500 animate-in slide-in-from-top-4">{toast}</div>}
+                    {toast && <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl font-bold animate-in slide-in-from-top-4">{toast}</div>}
                     
-                    {renderSidebar()}
+                    <aside className={`no-print ${isSidebarOpen ? 'w-72' : 'w-20'} bg-slate-900 text-slate-400 transition-all duration-300 flex flex-col h-screen sticky top-0 shrink-0 z-50`}>
+                        <div className="p-6 text-white font-black text-xl flex items-center gap-3 border-b border-slate-800 relative">
+                            <div className="bg-emerald-500 p-2 rounded-lg text-slate-900"><Icon name="BrainCircuit" /></div>
+                            {isSidebarOpen && <span className="uppercase">SIMR AI PRO</span>}
+                        </div>
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="absolute -right-3 top-20 bg-emerald-500 text-white p-1 rounded-full border-2 border-white z-10"><Icon name={isSidebarOpen ? "ChevronLeft" : "ChevronRight"} className="w-4 h-4" /></button>
+                        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+                            {[
+                                { id: 1, label: 'Konteks ILP', icon: 'Building2' },
+                                { id: 2, label: 'Register (Form 1)', icon: 'AlertTriangle' },
+                                { id: 3, label: 'Akar Masalah (RCA)', icon: 'Search' },
+                                { id: 4, label: 'Profil (Form 2)', icon: 'Target' },
+                                { id: 6, label: 'Monitoring (Form 3)', icon: 'Activity' },
+                                { id: 7, label: 'Pusat Cetak', icon: 'Printer' }
+                            ].map(m => (
+                                <button key={m.id} onClick={() => setStep(m.id)} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${step === m.id ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800'}`}>
+                                    <Icon name={m.icon} />{isSidebarOpen && <span className="text-sm font-semibold">{m.label}</span>}
+                                </button>
+                            ))}
+                            <hr className="border-slate-800 my-2 mx-3" />
+                            <button onClick={handleSaveDraft} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-slate-800 text-blue-400"><Icon name="Save" />{isSidebarOpen && <span className="text-sm font-semibold">Simpan Draft (.txt)</span>}</button>
+                            <button onClick={() => fileInputRef.current.click()} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-slate-800 text-yellow-400"><Icon name="Upload" />{isSidebarOpen && <span className="text-sm font-semibold">Muat Draft (.txt)</span>}</button>
+                            <input type="file" accept=".txt" ref={fileInputRef} onChange={handleLoadDraft} className="hidden" />
+                        </nav>
+                        <div className="p-4 bg-slate-950 border-t border-slate-800 shrink-0">
+                            {isSidebarOpen && (
+                                <>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <input type="password" value={apiKeyInput} onChange={e => setApiKeyInput(e.target.value)} placeholder="API Key" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-white" />
+                                        <button onClick={simpanApiKey} className="bg-emerald-600 text-white px-3 py-2 rounded text-xs font-bold">Set</button>
+                                    </div>
+                                    <p className="text-[9px] text-emerald-500">Model: {activeModel}</p>
+                                </>
+                            )}
+                        </div>
+                    </aside>
                     
                     <main className="flex-1 p-4 md:p-8 overflow-x-hidden relative">
                         <header className="flex justify-between items-center mb-8 no-print">
                             <h2 className="text-sm font-bold text-slate-400 tracking-widest uppercase">Langkah {step} / 7</h2>
-                            <div className="bg-white px-4 py-2 rounded-xl text-xs font-bold text-emerald-600 shadow-sm border">{profil.faskes} • {profil.tahun}</div>
+                            <div className="bg-white px-4 py-2 rounded-xl text-xs font-bold text-emerald-600 border">{profil.faskes} • {profil.tahun}</div>
                         </header>
 
                         <div className="max-w-[1700px] mx-auto pb-24">
-                            {/* STEP 1: CONTEXT & FULL HIERARCHY */}
+                            {/* STEP 1: CONTEXT */}
                             {step === 1 && (
-                                <div className="space-y-8 animate-in fade-in duration-500">
+                                <div className="space-y-8 animate-in fade-in">
                                     <div className="bg-white p-8 rounded-3xl border-l-[12px] border-l-emerald-500 shadow-xl border">
                                         <h2 className="text-2xl font-black mb-6">Profil Fasilitas</h2>
                                         <div className="grid md:grid-cols-4 gap-6">
@@ -861,317 +541,201 @@
                                             <div><label className="text-[10px] font-black text-slate-400">TANGGAL</label><input type="date" className="input-inline font-bold" value={profil.tanggal} onChange={e=>setProfil({...profil, tanggal: e.target.value})} /></div>
                                         </div>
                                     </div>
-                                    <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
+                                    <div className="bg-white p-8 rounded-3xl shadow-xl border">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h2 className="text-2xl font-black tracking-tight uppercase italic text-emerald-800">Hierarki ILP (Integrasi Pelayanan Primer)</h2>
-                                            <button onClick={()=>setKonteks([...konteks, {id: Date.now(), klaster: '', program: '', kegiatan: '', rincian: '', tujuan: '', sasaran: '', aiGoalOptions: []}])} className="bg-emerald-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md hover:scale-105 transition-all">+ Tambah Unit Kerja</button>
+                                            <h2 className="text-2xl font-black uppercase text-emerald-800">Hierarki ILP</h2>
+                                            <button onClick={()=>setKonteks([...konteks, {id: Date.now(), klaster: '', program: '', kegiatan: '', rincian: '', tujuan: '', sasaran: '', aiGoalOptions: []}])} className="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold shadow-md hover:scale-105 transition-all">+ Tambah</button>
                                         </div>
                                         {konteks.map(k => (
-                                            <div key={k.id} className="p-6 bg-slate-50 border border-slate-200 rounded-3xl mb-10 relative group space-y-6">
+                                            <div key={k.id} className="p-6 bg-slate-50 border rounded-3xl mb-10 relative group space-y-6">
                                                 <div className="grid md:grid-cols-3 gap-6">
                                                     <div>
                                                         <label className="text-[10px] font-black text-slate-400 uppercase">1. KLASTER</label>
                                                         <select className="input-inline select-custom font-bold" value={k.klaster} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, klaster: e.target.value, program: '', kegiatan: '', rincian: ''}:x))}>
-                                                            <option value="">Pilih Klaster</option>
-                                                            {Object.keys(ILP_DATABASE).map(opt=><option key={opt} value={opt}>{opt}</option>)}
+                                                            <option value="">Pilih Klaster</option>{Object.keys(ILP_DATABASE).map(opt=><option key={opt}>{opt}</option>)}
                                                         </select>
                                                     </div>
                                                     <div>
                                                         <label className="text-[10px] font-black text-slate-400 uppercase">2. PROGRAM</label>
                                                         <select className="input-inline select-custom font-bold" disabled={!k.klaster} value={k.program} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, program: e.target.value, kegiatan: '', rincian: ''}:x))}>
-                                                            <option value="">Pilih Program</option>
-                                                            {k.klaster && Object.keys(ILP_DATABASE[k.klaster] || {}).map(opt=><option key={opt} value={opt}>{opt}</option>)}
+                                                            <option value="">Pilih Program</option>{k.klaster && Object.keys(ILP_DATABASE[k.klaster] || {}).map(opt=><option key={opt}>{opt}</option>)}
                                                         </select>
                                                     </div>
                                                     <div>
                                                         <label className="text-[10px] font-black text-slate-400 uppercase">3. KEGIATAN</label>
                                                         <select className="input-inline select-custom font-bold text-emerald-700" disabled={!k.program} value={k.kegiatan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, kegiatan: e.target.value, rincian: ''}:x))}>
-                                                            <option value="">Pilih Kegiatan</option>
-                                                            {k.program && Object.keys(ILP_DATABASE[k.klaster][k.program] || {}).map(opt=><option key={opt} value={opt}>{opt}</option>)}
+                                                            <option value="">Pilih Kegiatan</option>{k.program && Object.keys(ILP_DATABASE[k.klaster][k.program] || {}).map(opt=><option key={opt}>{opt}</option>)}
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div className="grid md:grid-cols-4 gap-6 pt-4 border-t items-end">
-                                                    <div className="md:col-span-1">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase">4. RINCIAN UNIT (Unit Dinilai)</label>
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase">4. RINCIAN UNIT</label>
                                                         <select className="input-inline font-black text-emerald-600 select-custom" disabled={!k.kegiatan} value={k.rincian} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, rincian: e.target.value}:x))}>
-                                                            <option value="">Pilih Rincian</option>
-                                                            {k.kegiatan && (ILP_DATABASE[k.klaster][k.program][k.kegiatan] || []).map(opt=><option key={opt} value={opt}>{opt}</option>)}
+                                                            <option value="">Pilih Rincian</option>{k.kegiatan && (ILP_DATABASE[k.klaster][k.program][k.kegiatan] || []).map(opt=><option key={opt}>{opt}</option>)}
                                                         </select>
                                                     </div>
-                                                    <div className="md:col-span-1">
+                                                    <div>
                                                         <label className="text-[10px] font-bold text-slate-400 uppercase">TUJUAN STRATEGIS</label>
-                                                        <textarea className="input-inline italic text-xs h-16" placeholder="Ketik manual..." value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} />
+                                                        <textarea className="input-inline italic text-xs h-16" value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} />
                                                     </div>
-                                                    <div className="md:col-span-1">
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN MUTU KINERJA</label>
-                                                        <textarea className="input-inline italic text-xs h-16" placeholder="Ketik manual..." value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} />
+                                                    <div>
+                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN KINERJA</label>
+                                                        <textarea className="input-inline italic text-xs h-16" value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} />
                                                     </div>
-                                                    <div className="flex flex-col gap-2">
-                                                        <button onClick={()=>handleAIGoals(k.id)} className="bg-blue-600 text-white p-3 rounded-2xl font-black text-[10px] flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg transition-transform hover:scale-105"><Icon name="Sparkles" className="w-3 h-3"/> SARAN AI</button>
-                                                    </div>
+                                                    <button onClick={()=>handleAIGoals(k.id)} className="bg-blue-600 text-white p-3 rounded-2xl text-[10px] font-black flex items-center justify-center hover:scale-105 transition"><Icon name="Sparkles" className="w-3 h-3 mr-2"/> SARAN AI</button>
                                                 </div>
-
-                                                {/* AI SUGGESTION OPTIONS */}
                                                 {k.aiGoalOptions?.length > 0 && (
-                                                    <div className="bg-white p-4 rounded-2xl border border-blue-200 grid md:grid-cols-3 gap-3 animate-in slide-in-from-top-4 mt-4">
+                                                    <div className="grid md:grid-cols-3 gap-3 mt-4">
                                                         {k.aiGoalOptions.map((opt, idx) => (
-                                                            <div key={idx} onClick={()=>{
-                                                                setKonteks(konteks.map(x => x.id === k.id ? { ...x, tujuan: opt.tujuan, sasaran: opt.sasaran, aiGoalOptions: [] } : x));
-                                                            }} className="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer text-[10px] group transition-all">
+                                                            <div key={idx} onClick={()=>{ setKonteks(konteks.map(x => x.id === k.id ? { ...x, tujuan: opt.tujuan, sasaran: opt.sasaran, aiGoalOptions: [] } : x)); }} className="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer text-[10px]">
                                                                 <p className="font-bold text-blue-800">Opsi {idx+1}:</p>
-                                                                <p className="italic mb-1 opacity-70">Tujuan: {opt.tujuan}</p>
-                                                                <p className="font-medium">Sasaran: {opt.sasaran}</p>
+                                                                <p className="italic">{opt.tujuan}</p><p className="font-medium">{opt.sasaran}</p>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 )}
-                                                <button onClick={()=>setKonteks(konteks.filter(x=>x.id!==k.id))} className="absolute -right-3 -top-3 opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full shadow-lg transition-all"><Icon name="Trash2" className="w-4 h-4"/></button>
+                                                <button onClick={()=>setKonteks(konteks.filter(x=>x.id!==k.id))} className="absolute -right-3 -top-3 opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full"><Icon name="Trash2" className="w-4 h-4"/></button>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            {/* STEP 2: REGISTER (FORM 1) DENGAN SARAN AI */}
+                            {/* STEP 2: REGISTER (FORM 1) */}
                             {step === 2 && (
                                 <div className="space-y-6">
-                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl mb-4 text-xs text-blue-800 flex items-start gap-3">
-                                        <Icon name="Info" className="w-6 h-6 shrink-0 mt-0.5" />
-                                        <div>
-                                            <strong className="block mb-1 text-sm">Panduan Pengisian Konteks & Kategori:</strong>
-                                            <ul className="list-decimal pl-4 space-y-1">
-                                                <li>Pertama, pilih <strong>1. Konteks Unit</strong> dari data yang telah dibuat di Langkah 1 agar risiko tertaut dengan benar.</li>
-                                                <li>Kedua, pilih <strong>2. Kategori Risiko</strong>, lalu tekan ikon <Icon name="Sparkles" className="w-3 h-3 inline"/> AI untuk mendapatkan saran identifikasi risiko yang spesifik.</li>
-                                                <li>Kolom <strong>Bobot (B)</strong> hanya berfungsi sebagai representasi nilai kriteria matriks dan <strong>tidak ikut dikalikan</strong> agar tetap sah secara format.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex justify-between items-end">
-                                        <h2 className="text-3xl font-black">Register Risiko (Form 1)</h2>
-                                        <button onClick={tambahRisiko} className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl hover:bg-emerald-700 transition-all">+ Baris Baru</button>
-                                    </div>
-                                    
-                                    <div className="overflow-x-auto bg-white rounded-[40px] border border-slate-200 shadow-2xl custom-scrollbar">
+                                    <div className="flex justify-between items-end"><h2 className="text-3xl font-black">Register (Form 1)</h2><button onClick={tambahRisiko} className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black">+ Baris Baru</button></div>
+                                    <div className="overflow-x-auto bg-white rounded-3xl border shadow-2xl custom-scrollbar">
                                         <table className="w-full text-[10px] border-collapse min-w-[2200px]">
-                                            <thead className="bg-slate-800 text-white uppercase text-center font-bold sticky top-0 z-10">
+                                            <thead className="bg-slate-800 text-white font-bold sticky top-0">
                                                 <tr>
-                                                    <th className="p-3 border border-slate-700" rowSpan="2">No</th>
-                                                    <th className="p-3 border border-slate-700 text-yellow-300" rowSpan="2">1. Konteks Unit (Pilih)</th>
-                                                    <th className="p-3 border border-slate-700 text-yellow-300" rowSpan="2">2. Kategori Risiko (Pilih)</th>
-                                                    <th className="p-3 border border-slate-700" colSpan="6">Identifikasi Risiko</th>
-                                                    <th className="p-3 border border-slate-700" rowSpan="2">Kontrol Saat Ini</th>
-                                                    <th className="p-3 border border-slate-700" colSpan="4">Analisa (Inherent)</th>
-                                                    <th className="p-3 border border-slate-700" colSpan="2">Evaluasi (Auto)</th>
-                                                    <th className="p-3 border border-slate-700 no-print text-yellow-300" rowSpan="2">3. Saran AI</th>
+                                                    <th className="p-3 border" rowSpan="2">Unit</th><th className="p-3 border" rowSpan="2">Kategori</th><th className="p-3 border" colSpan="6">Identifikasi</th><th className="p-3 border" rowSpan="2">Kontrol</th><th className="p-3 border" colSpan="4">Inherent</th><th className="p-3 border" colSpan="2">Evaluasi</th><th className="p-3 border" rowSpan="2">AI</th>
                                                 </tr>
-                                                <tr className="bg-slate-700 text-[8px]">
-                                                    <th>Sumber</th><th>Sebab</th><th>Kode</th><th>Risiko</th><th>Dampak</th><th>Narasi (Pernyataan)</th><th>D</th><th>K</th><th title="Bobot (Khusus Non-Klinis)">B*</th><th>Skor</th><th>Selera</th><th>Mitigasi?</th>
-                                                </tr>
+                                                <tr className="bg-slate-700 text-[8px]"><th>Sumber</th><th>Sebab</th><th>Kode</th><th>Risiko</th><th>Dampak</th><th>Narasi</th><th>D</th><th>K</th><th>B*</th><th>Skor</th><th>Selera</th><th>Mitigasi</th></tr>
                                             </thead>
                                             <tbody>
-                                                {risiko.map((r, i) => {
-                                                    const ctx = konteks.find(c=>c.id===r.idKonteks);
-                                                    return (
+                                                {risiko.map((r, i) => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRiskOptions?.length > 0 && (
                                                             <tr>
-                                                                <td colSpan="17" className="p-4 bg-emerald-50 border border-emerald-200 animate-in slide-in-from-top-2">
-                                                                    <p className="text-[10px] font-black text-emerald-800 mb-2"><Icon name="Sparkles" className="w-3 h-3 inline mr-1"/>Pilih Saran Identifikasi Risiko (Berdasarkan Kategori {r.kategori}):</p>
+                                                                <td colSpan="17" className="p-4 bg-emerald-50">
                                                                     <div className="grid md:grid-cols-3 gap-4">
                                                                         {r.aiRiskOptions.map((opt, idx) => (
-                                                                            <div key={idx} onClick={()=>applyAiRiskOption(r.id, opt)} className="bg-white p-3 rounded-xl border border-emerald-200 cursor-pointer hover:shadow-lg transition-all">
-                                                                                <p className="font-bold text-emerald-900 mb-1">Opsi {idx+1}: {opt.risiko}</p>
-                                                                                <p className="italic text-slate-600 mb-2 line-clamp-2">{opt.pernyataan}</p>
-                                                                                <div className="flex justify-between items-center font-mono">
-                                                                                    <span className="bg-emerald-100 text-emerald-800 px-2 rounded">Skor Est: {(parseInt(opt.d)||1) * (parseInt(opt.k)||1)}</span>
-                                                                                    {!isKlinis(r.kategori) && <span className="text-emerald-700">Bobot: {opt.b || 5}</span>}
-                                                                                </div>
+                                                                            <div key={idx} onClick={()=>applyAiRiskOption(r.id, opt)} className="bg-white p-3 rounded-xl border cursor-pointer hover:shadow">
+                                                                                <p className="font-bold">Opsi {idx+1}: {opt.risiko}</p><p className="italic text-slate-600">{opt.pernyataan}</p>
                                                                             </div>
                                                                         ))}
                                                                     </div>
                                                                 </td>
                                                             </tr>
                                                         )}
-                                                        <tr className="hover:bg-slate-50 transition-all group">
-                                                            <td className="p-1 border text-center font-black text-slate-300">{i+1}</td>
-                                                            <td className="p-1 border bg-blue-50">
-                                                                <select className="w-full bg-transparent font-bold outline-none text-blue-800 text-[9px] cursor-pointer" value={r.idKonteks || ''} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}>
-                                                                    <option value="">-- Pilih Unit --</option>
-                                                                    {konteks.map(c => <option key={c.id} value={c.id}>{c.kegiatan} - {c.rincian}</option>)}
-                                                                </select>
-                                                            </td>
-                                                            <td className="p-1 border bg-emerald-50"><select className="w-full bg-transparent font-bold outline-none text-emerald-800" value={r.kategori} onChange={e=>updateRisiko(r.id, 'kategori', e.target.value)}><option value="">-- Pilih Kategori --</option>{KATEGORI_RISIKO.map(k=><option key={k}>{k}</option>)}</select></td>
+                                                        <tr className="hover:bg-slate-50">
+                                                            <td className="p-1 border"><select className="w-full bg-transparent font-bold outline-none" value={r.idKonteks} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}><option value="">Pilih</option>{konteks.map(c => <option key={c.id} value={c.id}>{c.rincian}</option>)}</select></td>
+                                                            <td className="p-1 border"><select className="w-full bg-transparent outline-none" value={r.kategori} onChange={e=>updateRisiko(r.id, 'kategori', e.target.value)}><option value="">Kategori</option>{KATEGORI_RISIKO.map(k=><option key={k}>{k}</option>)}</select></td>
                                                             <td className="p-1 border"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sumber} onChange={e=>updateRisiko(r.id, 'identifikasi.sumber', e.target.value)} /></td>
                                                             <td className="p-1 border"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sebab} onChange={e=>updateRisiko(r.id, 'identifikasi.sebab', e.target.value)} /></td>
-                                                            <td className="p-1 border font-mono text-center text-slate-600 font-bold bg-slate-100">{r.identifikasi.kode}</td>
-                                                            <td className="p-1 border font-bold text-emerald-800"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.risiko} onChange={e=>updateRisiko(r.id, 'identifikasi.risiko', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center">{r.identifikasi.kode}</td>
+                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.risiko} onChange={e=>updateRisiko(r.id, 'identifikasi.risiko', e.target.value)} /></td>
                                                             <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.dampak} onChange={e=>updateRisiko(r.id, 'identifikasi.dampak', e.target.value)} /></td>
-                                                            <td className="p-1 border bg-yellow-50/30"><textarea className="w-full h-12 italic text-[9px] bg-transparent outline-none" value={r.identifikasi.pernyataan} onChange={e=>updateRisiko(r.id, 'identifikasi.pernyataan', e.target.value)} /></td>
-                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.analisa.pengendalian} onChange={e=>updateRisiko(r.id, 'analisa.pengendalian', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center">
-                                                                <input type="number" disabled={isKlinis(r.kategori)} className={`w-8 text-center bg-transparent outline-none ${isKlinis(r.kategori) ? 'opacity-20 cursor-not-allowed' : 'font-bold text-blue-700'}`} value={isKlinis(r.kategori) ? '' : r.analisa.b} placeholder={isKlinis(r.kategori) ? 'N/A' : 'B'} onChange={e=>updateRisiko(r.id, 'analisa.b', e.target.value)} title={isKlinis(r.kategori) ? "Risiko Klinis tidak menggunakan Bobot" : "Tentukan Bobot Non-Klinis"} />
-                                                            </td>
-                                                            <td className={`p-1 border text-center font-black text-[12px] ${r.analisa.skor >= 12 ? 'text-red-600' : 'text-slate-800'}`}>{r.analisa.skor}</td>
-                                                            <td className="p-1 border"><select className="w-full text-[8px] bg-transparent outline-none" value={r.evaluasi.selera} onChange={e=>updateRisiko(r.id, 'evaluasi.selera', e.target.value)}><option>Diatas selera risiko</option><option>Dibawah selera risiko</option></select></td>
-                                                            <td className="p-1 border text-center"><select className="font-bold w-full bg-transparent outline-none" value={r.evaluasi.perluPenanganan} onChange={e=>updateRisiko(r.id, 'evaluasi.perluPenanganan', e.target.value)}><option>Ya</option><option>Tidak</option></select></td>
-                                                            <td className="p-1 border text-center no-print">
-                                                                <button onClick={()=>handleAIGenerateRisks(r.id)} className="bg-yellow-100 p-2 rounded-full text-yellow-600 hover:scale-125 transition-transform shadow"><Icon name="Sparkles" /></button>
-                                                            </td>
+                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.pernyataan} onChange={e=>updateRisiko(r.id, 'identifikasi.pernyataan', e.target.value)} /></td>
+                                                            <td className="p-1 border"><input className="w-full bg-transparent outline-none" value={r.analisa.pengendalian} onChange={e=>updateRisiko(r.id, 'analisa.pengendalian', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center"><input type="number" disabled={isKlinis(r.kategori)} className="w-8 text-center bg-transparent outline-none" value={isKlinis(r.kategori) ? '' : r.analisa.b} onChange={e=>updateRisiko(r.id, 'analisa.b', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center font-black">{r.analisa.skor}</td>
+                                                            <td className="p-1 border"><select className="w-full bg-transparent text-[8px] outline-none" value={r.evaluasi.selera} onChange={e=>updateRisiko(r.id, 'evaluasi.selera', e.target.value)}><option>Diatas selera risiko</option><option>Dibawah selera risiko</option></select></td>
+                                                            <td className="p-1 border text-center"><select className="w-full bg-transparent outline-none" value={r.evaluasi.perluPenanganan} onChange={e=>updateRisiko(r.id, 'evaluasi.perluPenanganan', e.target.value)}><option>Ya</option><option>Tidak</option></select></td>
+                                                            <td className="p-1 border text-center"><button onClick={()=>handleAIGenerateRisks(r.id)} className="bg-yellow-100 p-2 rounded-full"><Icon name="Sparkles" /></button></td>
                                                         </tr>
                                                     </React.Fragment>
-                                                    );
-                                                })}
+                                                ))}
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             )}
 
-                            {/* STEP 3: RCA (5-WHY) DENGAN KONTEKS */}
+                            {/* STEP 3: RCA */}
                             {step === 3 && (
                                 <div className="space-y-6">
-                                    <h2 className="text-3xl font-black">Langkah 3: Bedah Akar Masalah (5-Why)</h2>
-                                    <p className="text-slate-500 italic mb-2">Seluruh daftar risiko dari Langkah 2 ditampilkan. Anda bisa mengabaikan risiko berskor rendah yang tidak memerlukan RCA.</p>
-                                    {risiko.map(r => {
-                                        const ctx = konteks.find(c=>c.id===r.idKonteks);
-                                        return (
-                                        <div key={r.id} className="bg-white p-8 rounded-[40px] shadow-2xl border relative overflow-hidden mb-6">
-                                            <div className="absolute top-0 left-0 w-3 h-full bg-blue-500"></div>
-                                            
-                                            {/* KONTEKS RCA */}
-                                            <div className="mb-8 p-6 bg-blue-50 border-l-8 border-blue-600 rounded-2xl shadow-sm">
-                                                <div className="flex flex-col gap-2 mb-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="bg-blue-600 text-white px-4 py-1 rounded-full font-mono text-[10px] font-bold">{r.identifikasi.kode || 'KODE'}</span>
-                                                        <select className="bg-white/60 border border-blue-300 rounded px-2 py-1 text-[10px] font-bold text-blue-900 outline-none cursor-pointer" value={r.idKonteks || ''} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}>
-                                                            <option value="">-- Pilih Konteks Unit --</option>
-                                                            {konteks.map(c => <option key={c.id} value={c.id}>{c.kegiatan} - {c.rincian}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <p className="text-[10px] font-bold text-blue-800 uppercase tracking-widest mt-1">Sasaran: {ctx?.sasaran || '-'}</p>
+                                    <h2 className="text-3xl font-black">Langkah 3: RCA (5-Why)</h2>
+                                    {risiko.map(r => (
+                                        <div key={r.id} className="bg-white p-8 rounded-3xl shadow-xl border mb-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold">{r.identifikasi.kode}</span>
+                                                    <h3 className="text-xl font-black mt-2">{r.identifikasi.risiko || '(Kosong)'}</h3>
                                                 </div>
-                                                <h3 className="text-2xl font-black text-slate-800 mb-3">
-                                                    {r.identifikasi.risiko || '(Pernyataan Risiko Belum Diisi)'}
-                                                </h3>
-                                                <div className="bg-white p-4 rounded-xl border border-blue-100">
-                                                    <p className="text-sm italic text-slate-700 font-medium">"{r.identifikasi.pernyataan || 'Pernyataan narasi risiko akan tampil di sini'}"</p>
-                                                </div>
+                                                <button onClick={()=>handleAIRCA(r.id)} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2"><Icon name="BrainCircuit" /> RCA AI</button>
                                             </div>
-
-                                            <div className="flex justify-end items-center mb-6">
-                                                <button onClick={()=>handleAIRCA(r.id)} className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-3 shadow-xl hover:bg-blue-700 transition-all"><Icon name="BrainCircuit" /> ANALISIS RCA AI</button>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                                            <div className="grid grid-cols-5 gap-4 mb-6">
                                                 {[1,2,3,4,5].map(n => (
-                                                    <div key={n} className="space-y-2">
-                                                        <div className="flex items-center gap-2"><div className="w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center text-[10px] font-black">{n}</div><label className="text-[10px] font-black text-slate-400 uppercase">WHY {n}</label></div>
-                                                        <textarea className="w-full p-4 border rounded-[24px] h-28 text-xs bg-slate-50 focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-inner" value={r.rca[`w${n}`]} onChange={e=>updateRisiko(r.id, `rca.w${n}`, e.target.value)} />
-                                                    </div>
+                                                    <textarea key={n} className="p-3 border rounded-xl h-24 text-xs bg-slate-50 outline-none" placeholder={`Why ${n}`} value={r.rca[`w${n}`]} onChange={e=>updateRisiko(r.id, `rca.w${n}`, e.target.value)} />
                                                 ))}
                                             </div>
-                                            <div className="bg-red-50 p-8 rounded-[32px] border-2 border-dashed border-red-200 flex flex-col md:flex-row gap-8">
+                                            <div className="bg-red-50 p-6 rounded-2xl border border-red-200 flex gap-6">
                                                 <div className="flex-1">
-                                                    <label className="text-xs font-black text-red-600 uppercase mb-3 block tracking-widest">AKAR MASALAH SISTEMIK (KESIMPULAN)</label>
-                                                    <input className="w-full p-4 border-b-4 border-red-300 bg-transparent font-black text-red-900 text-xl placeholder:text-red-200 outline-none" placeholder="Isi akar masalah..." value={r.rca.akar} onChange={e=>updateRisiko(r.id, 'rca.akar', e.target.value)} />
+                                                    <label className="text-[10px] font-black text-red-600">AKAR MASALAH</label>
+                                                    <input className="w-full bg-transparent font-black text-lg outline-none" value={r.rca.akar} onChange={e=>updateRisiko(r.id, 'rca.akar', e.target.value)} />
                                                 </div>
-                                                <div className="w-full md:w-80">
-                                                    <label className="text-xs font-black text-slate-400 uppercase mb-3 block">JENIS PENYEBAB</label>
-                                                    <input className="w-full p-4 border-b-4 border-slate-300 bg-transparent font-bold text-slate-700 outline-none" placeholder="Cth: Kebijakan" value={r.rca.jenis} onChange={e=>updateRisiko(r.id, 'rca.jenis', e.target.value)} />
+                                                <div className="w-64">
+                                                    <label className="text-[10px] font-black text-slate-500">JENIS</label>
+                                                    <input className="w-full bg-transparent font-bold outline-none border-b border-slate-300" value={r.rca.jenis} onChange={e=>updateRisiko(r.id, 'rca.jenis', e.target.value)} />
                                                 </div>
                                             </div>
                                         </div>
-                                        );
-                                    })}
+                                    ))}
                                 </div>
                             )}
 
-                            {/* STEP 4: PROFIL & RTP (FORM 2) */}
+                            {/* STEP 4: PROFIL (FORM 2) */}
                             {step === 4 && (
                                 <div className="space-y-6">
-                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl mb-4 text-xs text-blue-800 flex items-start gap-3">
-                                        <Icon name="Info" className="w-6 h-6 shrink-0 mt-0.5" />
-                                        <div>
-                                            <strong className="block mb-1 text-sm">Panduan Pengisian Rencana Penanganan (RTP):</strong>
-                                            <ul className="list-decimal pl-4 space-y-1">
-                                                <li>Isi Rencana Penanganan (RTP) untuk menurunkan tingkat Kemungkinan atau Dampak dari Risiko Inherent awal.</li>
-                                                <li>Sistem akan memberikan <strong className="text-red-600">Warning (Peringatan Dini)</strong> jika Target Residual (D x K) yang Anda rencanakan masih <strong>Sama (Tetap)</strong> atau bahkan <strong>Lebih Tinggi (Naik)</strong> dari skor Inherent awal. Pastikan RTP dirancang efektif hingga menghasilkan <strong>Trend Turun</strong>.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <h2 className="text-3xl font-black uppercase tracking-tighter">Form 2: Profil & Penanganan</h2>
+                                    <h2 className="text-3xl font-black">Form 2: Profil & RTP</h2>
                                     <div className="overflow-x-auto bg-white rounded-3xl border shadow-xl custom-scrollbar">
                                         <table className="w-full text-[10px] border-collapse min-w-[1500px]">
-                                            <thead className="bg-slate-800 text-white font-bold uppercase text-center sticky top-0 z-10">
+                                            <thead className="bg-slate-800 text-white font-bold sticky top-0">
                                                 <tr>
-                                                    <th className="p-3 border border-slate-700 text-yellow-300" rowSpan="2">Unit Terkait (Pilih)</th>
-                                                    <th className="p-3 border border-slate-700" rowSpan="2">Kode</th><th className="p-3 border border-slate-700" rowSpan="2">Risiko Prioritas</th><th className="p-3 border border-slate-700" rowSpan="2">Akar Masalah</th><th colSpan="4" className="border border-slate-700">Inherent</th><th colSpan="4" className="border border-slate-700">Rencana Penanganan (RTP)</th><th colSpan="4" className="border border-slate-700">Residual Harapan</th><th className="p-3 border border-slate-700" rowSpan="2">Pemilik Risiko</th><th className="p-3 border border-slate-700 no-print" rowSpan="2">Saran AI</th>
+                                                    <th className="p-2 border" rowSpan="2">Unit</th><th className="p-2 border" rowSpan="2">Kode</th><th className="p-2 border" rowSpan="2">Risiko</th><th className="p-2 border" rowSpan="2">Akar Masalah</th><th colSpan="4" className="border">Inherent</th><th colSpan="4" className="border">RTP</th><th colSpan="4" className="border">Residual</th><th className="p-2 border" rowSpan="2">Pemilik</th><th className="p-2 border" rowSpan="2">AI</th>
                                                 </tr>
-                                                <tr className="bg-slate-700 text-[8px]">
-                                                    <th>D</th><th>K</th><th title="Sesuai Kebijakan Internal Fasyankes">B*</th><th>Skor</th><th>Opsi</th><th>Uraian Langkah</th><th>Target</th><th>Biaya</th><th>D</th><th>K</th><th title="Sesuai Kebijakan Internal Fasyankes">B*</th><th>Skor</th>
-                                                </tr>
+                                                <tr className="bg-slate-700 text-[8px]"><th>D</th><th>K</th><th>B*</th><th>Skor</th><th>Opsi</th><th>Uraian</th><th>Waktu</th><th>Biaya</th><th>D</th><th>K</th><th>B*</th><th>Skor</th></tr>
                                             </thead>
                                             <tbody>
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRtpOptions?.length > 0 && (
                                                             <tr>
-                                                                <td colSpan="17" className="p-4 bg-emerald-50 border border-emerald-200 animate-in slide-in-from-top-2">
-                                                                    <p className="text-[10px] font-black text-emerald-800 mb-2"><Icon name="Sparkles" className="w-3 h-3 inline mr-1"/>Pilih Saran Penanganan untuk {r.identifikasi.kode}:</p>
+                                                                <td colSpan="17" className="p-4 bg-emerald-50">
                                                                     <div className="grid md:grid-cols-3 gap-4">
                                                                         {r.aiRtpOptions.map((opt, idx) => (
-                                                                            <div key={idx} onClick={()=>applyAiRtpOption(r.id, opt)} className="bg-white p-3 rounded-xl border border-emerald-200 cursor-pointer hover:shadow-lg transition-all">
-                                                                                <p className="font-bold text-emerald-900 mb-1">Opsi {idx+1}: {opt.opsi}</p>
-                                                                                <p className="italic text-slate-600 mb-2">{opt.uraian}</p>
-                                                                                <div className="flex justify-between items-center font-mono">
-                                                                                    <span className="bg-emerald-100 text-emerald-800 px-2 rounded">Res: {(parseInt(opt.rd)||1) * (parseInt(opt.rk)||1)}</span>
-                                                                                    <span className="text-emerald-700 truncate w-24 text-right">{opt.pemilik}</span>
-                                                                                </div>
+                                                                            <div key={idx} onClick={()=>applyAiRtpOption(r.id, opt)} className="bg-white p-3 rounded-xl border cursor-pointer hover:shadow">
+                                                                                <p className="font-bold">Opsi {idx+1}: {opt.opsi}</p><p className="italic text-slate-600">{opt.uraian}</p>
                                                                             </div>
                                                                         ))}
                                                                     </div>
                                                                 </td>
                                                             </tr>
                                                         )}
-                                                        <tr className="hover:bg-slate-50 transition-colors">
-                                                            <td className="p-1 border bg-blue-50">
-                                                                <select className="w-full bg-transparent font-bold outline-none text-blue-800 text-[9px] cursor-pointer" value={r.idKonteks || ''} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}>
-                                                                    <option value="">-- Pilih Unit --</option>
-                                                                    {konteks.map(c => <option key={c.id} value={c.id}>{c.rincian}</option>)}
-                                                                </select>
-                                                            </td>
-                                                            <td className="p-2 border text-center font-mono text-slate-600 font-bold bg-slate-100">{r.identifikasi.kode}</td>
-                                                            <td className="p-2 border font-bold text-slate-800">{r.identifikasi.risiko}</td>
-                                                            <td className="p-2 border italic text-red-700">{r.rca.akar || r.identifikasi.sebab}</td>
-                                                            <td className="p-2 border text-center bg-slate-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
-                                                            <td className="p-2 border text-center bg-slate-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
-                                                            <td className="p-2 border text-center text-blue-600 font-bold bg-slate-50" title="Sesuai Kebijakan Internal Fasyankes">*</td>
-                                                            <td className={`p-2 border text-center font-black ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
-                                                            <td className="p-2 border"><select className="w-full bg-transparent outline-none" value={r.rtp.opsi} onChange={e=>updateRisiko(r.id, 'rtp.opsi', e.target.value)}>{OPSI_PENANGANAN.map(o=><option key={o}>{o}</option>)}</select></td>
-                                                            <td className="p-2 border font-medium"><textarea className="w-full h-12 bg-transparent outline-none font-medium" value={r.rtp.uraian} onChange={e=>updateRisiko(r.id, 'rtp.uraian', e.target.value)} /></td>
-                                                            <td className="p-2 border"><input className="w-full text-center bg-transparent outline-none" value={r.rtp.waktu} onChange={e=>updateRisiko(r.id, 'rtp.waktu', e.target.value)} /></td>
-                                                            <td className="p-2 border"><select className="w-full bg-transparent outline-none" value={r.rtp.biaya} onChange={e=>updateRisiko(r.id, 'rtp.biaya', e.target.value)}><option>Retensi</option><option>Transfer</option></select></td>
-                                                            <td className="p-2 border text-center bg-emerald-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.rtp.rd} onChange={e=>updateRisiko(r.id, 'rtp.rd', e.target.value)} /></td>
-                                                            <td className="p-2 border text-center bg-emerald-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.rtp.rk} onChange={e=>updateRisiko(r.id, 'rtp.rk', e.target.value)} /></td>
-                                                            <td className="p-2 border text-center text-emerald-600 font-bold bg-emerald-50" title="Sesuai Kebijakan Internal Fasyankes">*</td>
-                                                            <td className={`p-2 border text-center align-middle font-black ${getTingkat(r.rtp.rskor).color}`}>
-                                                                <span className="block text-sm">{r.rtp.rskor}</span>
-                                                                {r.analisa.skor > 0 && r.rtp.rskor > r.analisa.skor && (
-                                                                    <div className="mt-1 bg-red-900 text-white text-[7px] px-1 py-0.5 rounded shadow whitespace-nowrap animate-pulse border border-red-400" title="Peringatan: Target risiko lebih besar dari risiko awal!">⚠️ TGT NAIK</div>
-                                                                )}
-                                                                {r.analisa.skor > 0 && r.rtp.rskor === r.analisa.skor && (
-                                                                    <div className="mt-1 bg-yellow-600 text-white text-[7px] px-1 py-0.5 rounded shadow whitespace-nowrap" title="Peringatan: Rencana penanganan tidak menurunkan skor risiko awal!">⚠️ TGT TETAP</div>
-                                                                )}
-                                                                {r.analisa.skor > 0 && r.rtp.rskor < r.analisa.skor && (
-                                                                    <div className="mt-1 bg-emerald-800 text-white text-[7px] px-1 py-0.5 rounded shadow whitespace-nowrap">✓ TGT TURUN</div>
-                                                                )}
-                                                            </td>
-                                                            <td className="p-2 border font-medium bg-yellow-50/20"><input className="w-full bg-transparent outline-none font-bold text-center text-emerald-800" value={r.rtp.pemilik} placeholder="PJ/Kepala..." onChange={e=>updateRisiko(r.id, 'rtp.pemilik', e.target.value)} /></td>
-                                                            <td className="p-2 border text-center no-print"><button onClick={()=>handleAIRTP(r.id)} className="bg-emerald-100 p-2 rounded-full text-emerald-600 hover:scale-125 transition-transform shadow"><Icon name="Sparkles" /></button></td>
+                                                        <tr className="hover:bg-slate-50">
+                                                            <td className="p-1 border">{konteks.find(c=>c.id===r.idKonteks)?.rincian}</td>
+                                                            <td className="p-2 border text-center font-mono">{r.identifikasi.kode}</td>
+                                                            <td className="p-2 border">{r.identifikasi.risiko}</td>
+                                                            <td className="p-2 border text-red-700">{r.rca.akar}</td>
+                                                            <td className="p-2 border text-center">{r.analisa.d}</td>
+                                                            <td className="p-2 border text-center">{r.analisa.k}</td>
+                                                            <td className="p-2 border text-center">*</td>
+                                                            <td className="p-2 border text-center font-black">{r.analisa.skor}</td>
+                                                            <td className="p-1 border"><select className="w-full bg-transparent outline-none" value={r.rtp.opsi} onChange={e=>updateRisiko(r.id, 'rtp.opsi', e.target.value)}>{OPSI_PENANGANAN.map(o=><option key={o}>{o}</option>)}</select></td>
+                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.rtp.uraian} onChange={e=>updateRisiko(r.id, 'rtp.uraian', e.target.value)} /></td>
+                                                            <td className="p-1 border"><input className="w-full text-center bg-transparent outline-none" value={r.rtp.waktu} onChange={e=>updateRisiko(r.id, 'rtp.waktu', e.target.value)} /></td>
+                                                            <td className="p-1 border"><select className="w-full bg-transparent outline-none" value={r.rtp.biaya} onChange={e=>updateRisiko(r.id, 'rtp.biaya', e.target.value)}><option>Retensi</option><option>Transfer</option></select></td>
+                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center bg-transparent outline-none" value={r.rtp.rd} onChange={e=>updateRisiko(r.id, 'rtp.rd', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center bg-transparent outline-none" value={r.rtp.rk} onChange={e=>updateRisiko(r.id, 'rtp.rk', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center">*</td>
+                                                            <td className="p-2 border text-center font-black">{r.rtp.rskor}</td>
+                                                            <td className="p-1 border"><input className="w-full bg-transparent outline-none text-center" value={r.rtp.pemilik} onChange={e=>updateRisiko(r.id, 'rtp.pemilik', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center"><button onClick={()=>handleAIRTP(r.id)} className="bg-emerald-100 p-2 rounded-full"><Icon name="Sparkles" /></button></td>
                                                         </tr>
                                                     </React.Fragment>
                                                 ))}
@@ -1181,107 +745,32 @@
                                 </div>
                             )}
 
-                            {/* STEP 6: MONITORING BERTAHAP */}
+                            {/* STEP 6: MONITORING */}
                             {step === 6 && (
                                 <div className="space-y-6">
-                                    <h2 className="text-3xl font-black uppercase">Form 3: Pemantauan & Peninjauan</h2>
-                                    <p className="text-slate-500 italic">Tekan ikon 🤖 AI secara berurutan untuk mendapatkan saran Realisasi -> Prediksi Hambatan -> Usulan Menindaklanjuti.</p>
+                                    <h2 className="text-3xl font-black">Form 3: Pemantauan</h2>
                                     <div className="overflow-x-auto bg-white rounded-3xl border shadow-xl custom-scrollbar">
                                         <table className="w-full text-xs border-collapse min-w-[1200px]">
-                                            <thead className="bg-slate-800 text-white font-bold text-center uppercase sticky top-0 z-10">
+                                            <thead className="bg-slate-800 text-white font-bold sticky top-0">
                                                 <tr>
-                                                    <th className="p-3 border border-slate-700 text-yellow-300 w-32">Unit Terkait (Pilih)</th>
-                                                    <th className="p-3 border border-slate-700">Risiko Prioritas</th><th className="p-3 border border-slate-700">Realisasi Penanganan</th><th className="p-3 border border-slate-700">Hambatan</th><th className="p-3 border border-slate-700">Usulan Alternatif (RTL)</th><th className="p-3 border border-slate-700 w-16" title="Skor Residual RTP">Skor Res</th><th className="p-3 border border-slate-700 w-24">Trend</th><th className="p-3 border border-slate-700 w-32">Efektivitas</th>
+                                                    <th className="p-3 border">Kode</th><th className="p-3 border">Risiko</th><th className="p-3 border">Realisasi</th><th className="p-3 border">Hambatan</th><th className="p-3 border">Usulan (RTL)</th><th className="p-3 border">Skor Res</th><th className="p-3 border">Trend</th><th className="p-3 border">Efektivitas</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
-                                                        {/* Render Pilihan Saran Realisasi */}
-                                                        {r.aiRealisasiOptions?.length > 0 && (
-                                                            <tr>
-                                                                <td colSpan="8" className="p-4 bg-blue-50 border border-blue-200">
-                                                                    <p className="text-[10px] font-black text-blue-800 mb-2">Pilih Saran Realisasi:</p>
-                                                                    <div className="grid md:grid-cols-3 gap-4">
-                                                                        {r.aiRealisasiOptions.map((opt, idx) => (
-                                                                            <div key={idx} onClick={()=>{ updateRisiko(r.id, 'monitoring.realisasi', opt.teks); updateRisiko(r.id, 'aiRealisasiOptions', []); }} className="bg-white p-3 rounded-xl border border-blue-200 cursor-pointer hover:shadow-lg text-xs">{opt.teks}</div>
-                                                                        ))}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                        {/* Render Pilihan Saran Hambatan */}
-                                                        {r.aiHambatanOptions?.length > 0 && (
-                                                            <tr>
-                                                                <td colSpan="8" className="p-4 bg-red-50 border border-red-200">
-                                                                    <p className="text-[10px] font-black text-red-800 mb-2">Pilih Prediksi Hambatan:</p>
-                                                                    <div className="grid md:grid-cols-3 gap-4">
-                                                                        {r.aiHambatanOptions.map((opt, idx) => (
-                                                                            <div key={idx} onClick={()=>{ updateRisiko(r.id, 'monitoring.hambatan', opt.teks); updateRisiko(r.id, 'aiHambatanOptions', []); }} className="bg-white p-3 rounded-xl border border-red-200 cursor-pointer hover:shadow-lg text-xs">{opt.teks}</div>
-                                                                        ))}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                        {/* Render Pilihan Saran Usulan */}
-                                                        {r.aiUsulanOptions?.length > 0 && (
-                                                            <tr>
-                                                                <td colSpan="8" className="p-4 bg-emerald-50 border border-emerald-200">
-                                                                    <p className="text-[10px] font-black text-emerald-800 mb-2">Pilih Usulan / RTL:</p>
-                                                                    <div className="grid md:grid-cols-3 gap-4">
-                                                                        {r.aiUsulanOptions.map((opt, idx) => (
-                                                                            <div key={idx} onClick={()=>{ updateRisiko(r.id, 'monitoring.usulan', opt.teks); updateRisiko(r.id, 'aiUsulanOptions', []); }} className="bg-white p-3 rounded-xl border border-emerald-200 cursor-pointer hover:shadow-lg text-xs">{opt.teks}</div>
-                                                                        ))}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-
-                                                        <tr className="hover:bg-slate-50 transition-colors">
-                                                            <td className="p-1 border bg-blue-50">
-                                                                <select className="w-full bg-transparent font-bold outline-none text-blue-800 text-[9px] cursor-pointer" value={r.idKonteks || ''} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}>
-                                                                    <option value="">-- Pilih Unit --</option>
-                                                                    {konteks.map(c => <option key={c.id} value={c.id}>{c.rincian}</option>)}
-                                                                </select>
-                                                            </td>
-                                                            <td className="p-4 border font-black text-emerald-900 bg-emerald-50/30">
-                                                                <span className="bg-black text-white px-2 py-0.5 rounded font-mono text-[9px] block w-max mb-1">{r.identifikasi.kode}</span>
-                                                                {r.identifikasi.risiko}
-                                                            </td>
-                                                            <td className="p-2 border">
-                                                                <div className="flex flex-col gap-2 h-full">
-                                                                    <textarea className="w-full flex-1 bg-transparent outline-none" value={r.monitoring.realisasi} onChange={e=>updateRisiko(r.id, 'monitoring.realisasi', e.target.value)} />
-                                                                    <button onClick={()=>handleAIMonitoring(r.id, 'Realisasi')} className="text-[9px] bg-blue-100 text-blue-700 px-2 py-1.5 rounded-lg font-bold hover:bg-blue-200">🤖 AI Realisasi</button>
-                                                                </div>
-                                                            </td>
-                                                            <td className="p-2 border">
-                                                                <div className="flex flex-col gap-2 h-full">
-                                                                    <textarea className="w-full flex-1 bg-transparent outline-none" value={r.monitoring.hambatan} onChange={e=>updateRisiko(r.id, 'monitoring.hambatan', e.target.value)} />
-                                                                    <button onClick={()=>handleAIMonitoring(r.id, 'Hambatan')} className="text-[9px] bg-red-100 text-red-700 px-2 py-1.5 rounded-lg font-bold hover:bg-red-200">🤖 AI Hambatan</button>
-                                                                </div>
-                                                            </td>
-                                                            <td className="p-2 border">
-                                                                <div className="flex flex-col gap-2 h-full">
-                                                                    <textarea className="w-full flex-1 bg-transparent outline-none" value={r.monitoring.usulan} onChange={e=>updateRisiko(r.id, 'monitoring.usulan', e.target.value)} />
-                                                                    <button onClick={()=>handleAIMonitoring(r.id, 'Usulan')} className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-1.5 rounded-lg font-bold hover:bg-emerald-200">🤖 AI Usulan (RTL)</button>
-                                                                </div>
-                                                            </td>
+                                                        {r.aiRealisasiOptions?.length > 0 && <tr><td colSpan="8" className="p-4 bg-blue-50"><div className="grid grid-cols-3 gap-2">{r.aiRealisasiOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.realisasi', opt.teks); updateRisiko(r.id, 'aiRealisasiOptions', []);}} className="p-2 bg-white border rounded cursor-pointer text-[10px]">{opt.teks}</div>)}</div></td></tr>}
+                                                        {r.aiHambatanOptions?.length > 0 && <tr><td colSpan="8" className="p-4 bg-red-50"><div className="grid grid-cols-3 gap-2">{r.aiHambatanOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.hambatan', opt.teks); updateRisiko(r.id, 'aiHambatanOptions', []);}} className="p-2 bg-white border rounded cursor-pointer text-[10px]">{opt.teks}</div>)}</div></td></tr>}
+                                                        {r.aiUsulanOptions?.length > 0 && <tr><td colSpan="8" className="p-4 bg-emerald-50"><div className="grid grid-cols-3 gap-2">{r.aiUsulanOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.usulan', opt.teks); updateRisiko(r.id, 'aiUsulanOptions', []);}} className="p-2 bg-white border rounded cursor-pointer text-[10px]">{opt.teks}</div>)}</div></td></tr>}
+                                                        <tr className="hover:bg-slate-50">
+                                                            <td className="p-2 border font-black text-center">{r.identifikasi.kode}</td>
+                                                            <td className="p-2 border">{r.identifikasi.risiko}</td>
+                                                            <td className="p-2 border"><textarea className="w-full outline-none bg-transparent" value={r.monitoring.realisasi} onChange={e=>updateRisiko(r.id, 'monitoring.realisasi', e.target.value)} /><button onClick={()=>handleAIMonitoring(r.id, 'Realisasi')} className="text-[9px] bg-blue-100 px-2 py-1 rounded">AI Realisasi</button></td>
+                                                            <td className="p-2 border"><textarea className="w-full outline-none bg-transparent" value={r.monitoring.hambatan} onChange={e=>updateRisiko(r.id, 'monitoring.hambatan', e.target.value)} /><button onClick={()=>handleAIMonitoring(r.id, 'Hambatan')} className="text-[9px] bg-red-100 px-2 py-1 rounded">AI Hambatan</button></td>
+                                                            <td className="p-2 border"><textarea className="w-full outline-none bg-transparent" value={r.monitoring.usulan} onChange={e=>updateRisiko(r.id, 'monitoring.usulan', e.target.value)} /><button onClick={()=>handleAIMonitoring(r.id, 'Usulan')} className="text-[9px] bg-emerald-100 px-2 py-1 rounded">AI Usulan</button></td>
                                                             <td className="p-2 border text-center font-black">{r.rtp.rskor}</td>
-                                                            <td className="p-2 border">
-                                                                <select className="w-full font-black text-center outline-none bg-transparent" value={r.monitoring.trend} onChange={e=>updateRisiko(r.id, 'monitoring.trend', e.target.value)} title="Otomatis dihitung dari perbandingan Inherent vs Residual">
-                                                                    <option value="Turun">Turun</option>
-                                                                    <option value="Tetap">Tetap</option>
-                                                                    <option value="Naik">Naik</option>
-                                                                    <option value="Zigzag">Zigzag</option>
-                                                                </select>
-                                                            </td>
-                                                            <td className="p-2 border text-center">
-                                                                <select className="w-full bg-transparent outline-none" value={r.monitoring.efektivitas} onChange={e=>updateRisiko(r.id, 'monitoring.efektivitas', e.target.value)} title="Otomatis dihitung dari perbandingan Inherent vs Residual">
-                                                                    <option value="Efektif">Efektif</option>
-                                                                    <option value="Sebagian Efektif">Sebagian Efektif</option>
-                                                                    <option value="Tidak Efektif">Tidak Efektif</option>
-                                                                </select>
-                                                            </td>
+                                                            <td className="p-2 border text-center uppercase">{r.monitoring.trend}</td>
+                                                            <td className="p-2 border text-center">{r.monitoring.efektivitas}</td>
                                                         </tr>
                                                     </React.Fragment>
                                                 ))}
@@ -1291,311 +780,85 @@
                                 </div>
                             )}
 
-                            {/* STEP 7: PRINT CENTER */}
+                            {/* STEP 7: PRINT */}
                             {step === 7 && (
-                                <div className="space-y-6 animate-in zoom-in duration-300">
-                                    <div className="bg-emerald-900 p-8 rounded-3xl flex flex-col md:flex-row justify-between items-center text-white no-print shadow-2xl">
-                                        <div><h2 className="text-2xl font-black tracking-tight">Export Matriks Kemenkes</h2><p className="text-emerald-200">Gunakan Shortcut keyboard (Ctrl+P / Cmd+P) jika popup diblokir browser.</p></div>
-                                        <div className="flex gap-4 items-center mt-4 md:mt-0">
+                                <div className="space-y-6">
+                                    <div className="bg-emerald-900 p-8 rounded-3xl flex justify-between items-center text-white no-print">
+                                        <h2 className="text-2xl font-black">Export Matriks</h2>
+                                        <div className="flex gap-4 items-center">
                                             <select className="p-3 text-slate-900 font-bold rounded-xl outline-none" value={printFormType} onChange={e=>setPrintFormType(e.target.value)}>
-                                                <option value="SEMUA">Cetak Semua Form & Lampiran</option>
-                                                <option value="REGISTER">Hanya Form 1 (Register)</option>
-                                                <option value="PROFIL">Hanya Form 2 (Profil & RTP)</option>
-                                                <option value="PEMANTAUAN">Hanya Form 3 (Pemantauan)</option>
-                                                <option value="RCA">Hanya Form RCA (5-Why)</option>
-                                                <option value="LAMPIRAN">Hanya Lampiran Kriteria Matriks Bobot</option>
+                                                <option value="SEMUA">Semua Form & Lampiran</option>
+                                                <option value="REGISTER">Form 1 (Register)</option>
+                                                <option value="PROFIL">Form 2 (Profil & RTP)</option>
+                                                <option value="PEMANTAUAN">Form 3 (Pemantauan)</option>
+                                                <option value="RCA">RCA (5-Why)</option>
+                                                <option value="LAMPIRAN">Lampiran Kriteria</option>
                                             </select>
-                                            <button onClick={handlePrint} className="bg-white text-emerald-900 px-10 py-4 rounded-2xl font-black flex items-center gap-3 shadow-xl hover:bg-emerald-50 transition-all scale-105"><Icon name="Printer" /> CETAK PDF</button>
+                                            <button onClick={handlePrint} className="bg-white text-emerald-900 px-8 py-3 rounded-2xl font-black flex items-center gap-2"><Icon name="Printer" /> CETAK PDF</button>
                                         </div>
                                     </div>
-
-                                    {/* PRINT AREA */}
                                     <div className="print-area text-black">
+                                        <p className="text-center font-bold text-slate-400 no-print">Tampilan Pratinjau (Layout disesuaikan saat Ctrl+P)</p>
                                         
-                                        {/* --- FORM 1: REGISTER --- */}
                                         {(printFormType === 'SEMUA' || printFormType === 'REGISTER') && (
-                                        <div className="bg-white p-6 border border-black print-section shadow-sm">
-                                            <div className="kop-surat mb-6 uppercase">
-                                                <h1 className="text-lg font-black tracking-tighter">FORM 1: REGISTER RISIKO TERINTEGRASI</h1>
-                                                <p className="text-[10px] font-bold leading-tight">{profil.faskes} - TAHUN ANGGARAN {profil.tahun}</p>
-                                            </div>
+                                        <div className="bg-white p-6 border border-black print-section mt-4">
+                                            <h1 className="text-lg font-black text-center uppercase">FORM 1: REGISTER RISIKO TERINTEGRASI</h1><p className="text-center text-[10px] font-bold mb-6">{profil.faskes} - {profil.tahun}</p>
                                             <table className="w-full border-black border-collapse">
-                                                <thead className="bg-slate-100 text-center font-bold">
+                                                <thead className="bg-slate-100 text-center font-bold text-[8px]">
                                                     <tr>
-                                                        <th rowSpan="2" className="border border-black">No</th><th rowSpan="2" className="border border-black">Kategori</th><th rowSpan="2" className="border border-black">Kegiatan</th><th rowSpan="2" className="border border-black">Sasaran</th><th colSpan="6" className="border border-black">Identifikasi Risiko</th><th rowSpan="2" className="border border-black">Kontrol Saat Ini</th><th colSpan="4" className="border border-black">Analisa (Inherent)</th><th colSpan="2" className="border border-black">Evaluasi</th>
-                                                    </tr>
-                                                    <tr className="bg-slate-50 text-[6px]">
-                                                        <th className="border border-black">Sumber</th><th className="border border-black">Sebab</th><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Dampak</th><th className="border border-black">Pernyataan</th><th className="border border-black w-3">D</th><th className="border border-black w-3">K</th><th className="border border-black w-3" title="Bobot Non-Klinis">B*</th><th className="border border-black">Skor</th><th className="border border-black">Selera</th><th className="border border-black">Mitigasi?</th>
+                                                        <th className="border border-black">No</th><th className="border border-black">Kategori</th><th className="border border-black">Sumber</th><th className="border border-black">Sebab</th><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Dampak</th><th className="border border-black">Kontrol</th><th className="border border-black w-3">D</th><th className="border border-black w-3">K</th><th className="border border-black w-3">B*</th><th className="border border-black">Skor</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
-                                                    {risiko.map((r, i) => {
-                                                        const ctx = konteks.find(c=>c.id===r.idKonteks);
-                                                        return (
-                                                            <tr key={i}>
-                                                                <td className="text-center font-bold border border-black">{i+1}</td>
-                                                                <td className="border border-black">{r.kategori}</td>
-                                                                <td className="border border-black">{ctx?.kegiatan}</td>
-                                                                <td className="border border-black">{ctx?.sasaran}</td>
-                                                                <td className="border border-black">{r.identifikasi.sumber}</td>
-                                                                <td className="border border-black">{r.identifikasi.sebab}</td>
-                                                                <td className="text-center font-mono border border-black">{r.identifikasi.kode}</td>
-                                                                <td className="border border-black font-bold">{r.identifikasi.risiko}</td>
-                                                                <td className="border border-black">{r.identifikasi.dampak}</td>
-                                                                <td className="italic border border-black">{r.identifikasi.pernyataan}</td>
-                                                                <td className="border border-black">{r.analisa.pengendalian}</td>
-                                                                <td className="text-center font-bold border border-black">{r.analisa.d}</td>
-                                                                <td className="text-center font-bold border border-black">{r.analisa.k}</td>
-                                                                <td className="text-center font-bold text-blue-800 bg-blue-50 border border-black">{isKlinis(r.kategori) ? '-' : r.analisa.b}</td>
-                                                                <td className="text-center font-black border border-black">{r.analisa.skor}</td>
-                                                                <td className="border border-black">{r.evaluasi.selera}</td>
-                                                                <td className="text-center font-bold border border-black">{r.evaluasi.perluPenanganan}</td>
-                                                            </tr>
-                                                        );
-                                                    })}
+                                                <tbody className="text-[8px]">
+                                                    {risiko.map((r, i) => (
+                                                        <tr key={i}>
+                                                            <td className="text-center border border-black">{i+1}</td><td className="border border-black">{r.kategori}</td><td className="border border-black">{r.identifikasi.sumber}</td><td className="border border-black">{r.identifikasi.sebab}</td><td className="text-center border border-black">{r.identifikasi.kode}</td><td className="border border-black">{r.identifikasi.risiko}</td><td className="border border-black">{r.identifikasi.dampak}</td><td className="border border-black">{r.analisa.pengendalian}</td><td className="text-center border border-black">{r.analisa.d}</td><td className="text-center border border-black">{r.analisa.k}</td><td className="text-center border border-black">{isKlinis(r.kategori)?'-':r.analisa.b}</td><td className="text-center font-bold border border-black">{r.analisa.skor}</td>
+                                                        </tr>
+                                                    ))}
                                                 </tbody>
                                             </table>
-                                            <div className="flex justify-end mt-12 break-inside-avoid">
-                                                <div className="text-center w-64 uppercase border-t border-black pt-2">
-                                                    <p className="text-[10px] mb-12 italic">Ditetapkan oleh: Kepala {profil.faskes}</p>
-                                                    <p className="font-black text-sm underline">{profil.pimpinan}</p>
-                                                </div>
-                                            </div>
                                         </div>
                                         )}
-
-                                        {/* --- FORM 2: PROFIL --- */}
+                                        
                                         {(printFormType === 'SEMUA' || printFormType === 'PROFIL') && (
-                                        <div className="bg-white p-6 border border-black print-section shadow-sm">
-                                            <div className="kop-surat mb-6 uppercase">
-                                                <h1 className="text-lg font-black tracking-tighter">FORM 2: PROFIL RISIKO & PENANGANAN</h1>
-                                                <p className="text-[10px] font-bold leading-tight">{profil.faskes} - TAHUN ANGGARAN {profil.tahun}</p>
-                                            </div>
-                                            <table className="w-full text-[8px] border-collapse border border-black">
-                                                <thead className="bg-slate-100 text-center font-bold">
-                                                    <tr>
-                                                        <th rowSpan="2" className="border border-black">Unit Terkait</th><th rowSpan="2" className="border border-black">Kode</th><th rowSpan="2" className="border border-black">Risiko Prioritas</th><th rowSpan="2" className="border border-black">Akar Masalah (RCA)</th><th colSpan="4" className="border border-black">Inherent</th><th colSpan="4" className="border border-black">Rencana Penanganan (RTP)</th><th colSpan="4" className="border border-black">Residual Harapan</th><th rowSpan="2" className="border border-black">Pemilik</th>
-                                                    </tr>
-                                                    <tr className="bg-slate-50 text-[6px]">
-                                                        <th className="border border-black w-4">D</th><th className="border border-black w-4">K</th><th className="border border-black w-4" title="Sesuai Kebijakan Internal Fasyankes">B*</th><th className="border border-black">Skor</th><th className="border border-black">Opsi</th><th className="border border-black">Uraian</th><th className="border border-black">Waktu</th><th className="border border-black">Biaya</th><th className="border border-black w-4">D</th><th className="border border-black w-4">K</th><th className="border border-black w-4" title="Sesuai Kebijakan Internal Fasyankes">B*</th><th className="border border-black">Skor</th>
-                                                    </tr>
+                                        <div className="bg-white p-6 border border-black print-section mt-4">
+                                            <h1 className="text-lg font-black text-center uppercase">FORM 2: PROFIL RISIKO & PENANGANAN</h1><p className="text-center text-[10px] font-bold mb-6">{profil.faskes} - {profil.tahun}</p>
+                                            <table className="w-full border-black border-collapse">
+                                                <thead className="bg-slate-100 text-center font-bold text-[8px]">
+                                                    <tr><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Akar (RCA)</th><th className="border border-black">Skor Awal</th><th className="border border-black">Opsi RTP</th><th className="border border-black">Uraian</th><th className="border border-black">Biaya</th><th className="border border-black">Skor Target</th><th className="border border-black">Pemilik</th></tr>
                                                 </thead>
-                                                <tbody>
-                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => {
-                                                        const ctx = konteks.find(c=>c.id===r.idKonteks);
-                                                        return (
+                                                <tbody className="text-[8px]">
+                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => (
                                                         <tr key={i}>
-                                                            <td className="text-center font-bold border border-black">{ctx?.rincian || '-'}</td>
-                                                            <td className="text-center font-mono border border-black">{r.identifikasi.kode}</td>
-                                                            <td className="border border-black font-bold">{r.identifikasi.risiko}</td>
-                                                            <td className="border border-black italic text-red-800">{r.rca.akar}</td>
-                                                            <td className="text-center font-bold border border-black">{r.analisa.d}</td>
-                                                            <td className="text-center font-bold border border-black">{r.analisa.k}</td>
-                                                            <td className="text-center font-bold text-blue-800 bg-blue-50 border border-black">*</td>
-                                                            <td className="text-center font-bold border border-black">{r.analisa.skor}</td>
-                                                            <td className="border border-black">{r.rtp.opsi}</td>
-                                                            <td className="border border-black">{r.rtp.uraian}</td>
-                                                            <td className="text-center border border-black">{r.rtp.waktu}</td>
-                                                            <td className="border border-black">{r.rtp.biaya}</td>
-                                                            <td className="text-center font-bold border border-black">{r.rtp.rd}</td>
-                                                            <td className="text-center font-bold border border-black">{r.rtp.rk}</td>
-                                                            <td className="text-center font-bold text-emerald-800 bg-emerald-50 border border-black">*</td>
-                                                            <td className="text-center font-black border border-black">{r.rtp.rskor}</td>
-                                                            <td className="border border-black font-bold text-emerald-900">{r.rtp.pemilik}</td>
+                                                            <td className="text-center border border-black">{r.identifikasi.kode}</td><td className="border border-black">{r.identifikasi.risiko}</td><td className="border border-black text-red-800">{r.rca.akar}</td><td className="text-center font-bold border border-black">{r.analisa.skor}</td><td className="border border-black">{r.rtp.opsi}</td><td className="border border-black">{r.rtp.uraian}</td><td className="border border-black">{r.rtp.biaya}</td><td className="text-center font-bold border border-black">{r.rtp.rskor}</td><td className="border border-black">{r.rtp.pemilik}</td>
                                                         </tr>
-                                                        );
-                                                    })}
+                                                    ))}
                                                 </tbody>
                                             </table>
-                                            
-                                            <div className="mt-4 border border-black p-2 text-[7px] bg-slate-50 break-inside-avoid">
-                                                <strong>Keterangan / Catatan Fasyankes:</strong>
-                                                <ul className="list-decimal pl-3 mt-1 space-y-0.5">
-                                                    <li>Kolom <strong>Skor Risiko</strong> didapatkan dari matriks pertemuan antara Dampak (D) dan Kemungkinan (K), bukan dikalikan dengan Bobot (B).</li>
-                                                    <li>Tanda ( * ) pada kolom <strong>Bobot (B)</strong> menunjukkan bahwa nilai bobot dapat disesuaikan untuk kategori Non-Klinis.</li>
-                                                    <li>Ketentuan mengenai definisi operasional untuk <strong>Level Dampak (1-5)</strong> pada setiap kategori risiko Non-Klinis (Operasional, Reputasi, Hukum, Kepatuhan, Keuangan, dll) diatur dan ditetapkan secara definitif melalui <strong>Surat Keputusan (SK) Kepala / Direktur Fasyankes</strong>.</li>
-                                                </ul>
-                                            </div>
                                         </div>
                                         )}
 
-                                        {/* --- FORM 3: PEMANTAUAN --- */}
                                         {(printFormType === 'SEMUA' || printFormType === 'PEMANTAUAN') && (
-                                        <div className="bg-white p-6 border border-black print-section shadow-sm">
-                                            <div className="kop-surat mb-6 uppercase">
-                                                <h1 className="text-lg font-black tracking-tighter">FORM 3: PEMANTAUAN DAN PENINJAUAN RISIKO</h1>
-                                                <p className="text-[10px] font-bold leading-tight">{profil.faskes} - TAHUN ANGGARAN {profil.tahun}</p>
-                                            </div>
-                                            <table className="w-full border-collapse border border-black">
-                                                <thead className="bg-slate-100 text-center font-bold">
-                                                    <tr>
-                                                        <th className="border border-black p-2">Unit Terkait</th><th className="border border-black p-2">Kode</th><th className="border border-black p-2">Risiko Prioritas</th><th className="border border-black p-2">Realisasi Penanganan</th><th className="border border-black p-2">Hambatan</th><th className="border border-black p-2">Usulan Alternatif (RTL)</th><th className="border border-black p-2">Skor Res</th><th className="border border-black p-2">Trend</th><th className="border border-black p-2">Efektivitas</th>
-                                                    </tr>
+                                        <div className="bg-white p-6 border border-black print-section mt-4">
+                                            <h1 className="text-lg font-black text-center uppercase">FORM 3: PEMANTAUAN RISIKO</h1><p className="text-center text-[10px] font-bold mb-6">{profil.faskes} - {profil.tahun}</p>
+                                            <table className="w-full border-black border-collapse">
+                                                <thead className="bg-slate-100 text-center font-bold text-[8px]">
+                                                    <tr><th className="border border-black">Kode</th><th className="border border-black">Risiko</th><th className="border border-black">Realisasi</th><th className="border border-black">Hambatan</th><th className="border border-black">Usulan (RTL)</th><th className="border border-black">Trend</th><th className="border border-black">Efektivitas</th></tr>
                                                 </thead>
-                                                <tbody>
-                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => {
-                                                        const ctx = konteks.find(c=>c.id===r.idKonteks);
-                                                        return (
+                                                <tbody className="text-[8px]">
+                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => (
                                                         <tr key={i}>
-                                                            <td className="text-center font-bold border border-black p-2">{ctx?.rincian || '-'}</td>
-                                                            <td className="text-center font-mono border border-black p-2">{r.identifikasi.kode}</td>
-                                                            <td className="font-bold border border-black p-2">{r.identifikasi.risiko}</td>
-                                                            <td className="border border-black p-2">{r.monitoring.realisasi}</td>
-                                                            <td className="border border-black p-2">{r.monitoring.hambatan}</td>
-                                                            <td className="border border-black p-2">{r.monitoring.usulan}</td>
-                                                            <td className="text-center font-bold border border-black p-2">{r.rtp.rskor}</td>
-                                                            <td className="text-center font-bold uppercase border border-black p-2">{r.monitoring.trend}</td>
-                                                            <td className="border border-black p-2">{r.monitoring.efektivitas}</td>
+                                                            <td className="text-center border border-black">{r.identifikasi.kode}</td><td className="border border-black">{r.identifikasi.risiko}</td><td className="border border-black">{r.monitoring.realisasi}</td><td className="border border-black">{r.monitoring.hambatan}</td><td className="border border-black">{r.monitoring.usulan}</td><td className="text-center border border-black uppercase">{r.monitoring.trend}</td><td className="text-center border border-black">{r.monitoring.efektivitas}</td>
                                                         </tr>
-                                                        );
-                                                    })}
+                                                    ))}
                                                 </tbody>
                                             </table>
                                         </div>
                                         )}
-
-                                        {/* --- RCA REPORT --- */}
-                                        {(printFormType === 'SEMUA' || printFormType === 'RCA') && (
-                                        <div className="bg-white p-6 border border-black print-section shadow-sm">
-                                            <div className="kop-surat mb-6 uppercase">
-                                                <h1 className="text-lg font-black tracking-tighter">LAPORAN ROOT CAUSE ANALYSIS (RCA 5-WHY)</h1>
-                                                <p className="text-[10px] font-bold leading-tight">{profil.faskes} - TAHUN ANGGARAN {profil.tahun}</p>
-                                            </div>
-                                            <div className="grid grid-cols-1 gap-6">
-                                                {risiko.map((r, i) => (
-                                                    <div key={i} className="border border-black p-4 bg-slate-50 break-inside-avoid shadow-sm rounded-lg">
-                                                        <h3 className="font-bold text-sm mb-3 border-b border-black pb-2"><span className="font-mono bg-black text-white px-2 py-0.5 rounded mr-2">{r.identifikasi.kode}</span> {r.identifikasi.risiko}</h3>
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <p className="text-[9px] font-bold mb-1">Analisis Berantai (5-Why):</p>
-                                                                <ul className="text-[9px] list-decimal pl-4 space-y-1">
-                                                                    <li>{r.rca.w1 || '-'}</li><li>{r.rca.w2 || '-'}</li><li>{r.rca.w3 || '-'}</li><li>{r.rca.w4 || '-'}</li><li>{r.rca.w5 || '-'}</li>
-                                                                </ul>
-                                                            </div>
-                                                            <div className="border-l border-black pl-4">
-                                                                <p className="text-[9px] font-bold text-red-600 mb-1">Akar Masalah Sistemik:</p>
-                                                                <p className="font-bold text-sm text-red-900 mb-3 bg-red-100 p-2 rounded">{r.rca.akar || 'Belum ada akar masalah'}</p>
-                                                                <p className="text-[9px] font-bold text-slate-600">Jenis Penyebab: <span className="font-normal text-black">{r.rca.jenis}</span></p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="flex justify-end mt-16 break-inside-avoid">
-                                                <div className="text-center w-64 uppercase border-t border-black pt-2">
-                                                    <p className="text-[10px] mb-12 italic">Disetujui oleh: Kepala {profil.faskes}</p>
-                                                    <p className="font-black text-sm underline">{profil.pimpinan}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
+                                        {(printFormType === 'SEMUA' || printFormType === 'RCA' || printFormType === 'LAMPIRAN') && (
+                                            <div className="text-center mt-10 p-10 border border-slate-300 text-slate-500 font-bold no-print">Format Lampiran dan RCA persis mengikuti data di atas. Klik Cetak PDF untuk melihat layout lengkapnya.</div>
                                         )}
-
-                                        {/* --- LAMPIRAN: MATRIKS KRITERIA BOBOT --- */}
-                                        {(printFormType === 'SEMUA' || printFormType === 'LAMPIRAN') && (
-                                        <div className="bg-white p-6 border border-black print-appendix shadow-sm">
-                                            <div className="kop-surat mb-6 uppercase">
-                                                <h1 className="text-lg font-black tracking-tighter">LAMPIRAN: KRITERIA DAN MATRIKS PENILAIAN RISIKO</h1>
-                                                <p className="text-[10px] font-bold leading-tight">{profil.faskes} - TAHUN ANGGARAN {profil.tahun}</p>
-                                            </div>
-                                            
-                                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                                <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 1: TINGKAT KEMUNGKINAN (K)</h3>
-                                                    <table className="w-full border-collapse border border-black text-[7px] text-center">
-                                                        <thead className="bg-slate-100 font-bold">
-                                                            <tr><th className="border border-black">Level</th><th className="border border-black">Kriteria</th><th className="border border-black">Frekuensi Aktual</th></tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr><td className="border border-black font-bold">1</td><td className="border border-black font-bold">Sangat Jarang</td><td className="border border-black">Terjadi &gt; 5 tahun sekali</td></tr>
-                                                            <tr><td className="border border-black font-bold">2</td><td className="border border-black font-bold">Jarang</td><td className="border border-black">Terjadi 2 - 5 tahun sekali</td></tr>
-                                                            <tr><td className="border border-black font-bold">3</td><td className="border border-black font-bold">Sedang</td><td className="border border-black">Terjadi 1 - 2 tahun sekali</td></tr>
-                                                            <tr><td className="border border-black font-bold">4</td><td className="border border-black font-bold">Sering</td><td className="border border-black">Terjadi beberapa kali setahun</td></tr>
-                                                            <tr><td className="border border-black font-bold">5</td><td className="border border-black font-bold">Sangat Sering</td><td className="border border-black">Terjadi tiap minggu/bulan</td></tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 2: PENGENDALIAN (CONTROLABILITY)</h3>
-                                                    <table className="w-full border-collapse border border-black text-[7px] text-center">
-                                                        <thead className="bg-slate-100 font-bold">
-                                                            <tr><th className="border border-black">Nilai</th><th className="border border-black">Kategori</th><th className="border border-black">Keterangan</th></tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr><td className="border border-black font-bold">1</td><td className="border border-black font-bold">Easy</td><td className="border border-black">Mudah untuk dikontrol</td></tr>
-                                                            <tr><td className="border border-black font-bold">2</td><td className="border border-black font-bold">Moderate Easy</td><td className="border border-black">Agak mudah dikontrol</td></tr>
-                                                            <tr><td className="border border-black font-bold">3</td><td className="border border-black font-bold">Moderate Difficult</td><td className="border border-black">Agak sulit dikontrol</td></tr>
-                                                            <tr><td className="border border-black font-bold">4</td><td className="border border-black font-bold">Difficult</td><td className="border border-black">Sulit untuk dikontrol</td></tr>
-                                                            <tr><td colSpan="3" className="border border-black bg-slate-50 italic text-[6px]">*Sebagai referensi mitigasi risiko</td></tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 3A: KRITERIA DAMPAK RISIKO KLINIS (KESELAMATAN PASIEN)</h3>
-                                            <table className="w-full border-collapse border border-black text-[7px] mb-4">
-                                                <thead className="bg-slate-100 font-bold text-center">
-                                                    <tr><th className="border border-black w-10">Level / Bobot</th><th className="border border-black w-24">Deskripsi</th><th className="border border-black">Kriteria Cedera Klinis</th></tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr><td className="border border-black font-bold text-center">1</td><td className="border border-black font-bold text-center">Sangat Ringan</td><td className="border border-black">Tidak ada cedera.</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">2</td><td className="border border-black font-bold text-center">Ringan</td><td className="border border-black">Cedera ringan (dapat diatasi dengan pertolongan pertama / P3K).</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">3</td><td className="border border-black font-bold text-center">Sedang</td><td className="border border-black">Cedera sedang (berkurangnya fungsi motorik/sensorik reversibel, perlu observasi lanjutan).</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">4</td><td className="border border-black font-bold text-center">Berat</td><td className="border border-black">Cedera luas/berat (kehilangan fungsi organ utama / cacat permanen).</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">5</td><td className="border border-black font-bold text-center">Sangat Berat</td><td className="border border-black">Kematian yang tidak berhubungan dengan perjalanan penyakit utama (Kejadian Sentinel).</td></tr>
-                                                </tbody>
-                                            </table>
-
-                                            <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 3B: KRITERIA DAMPAK (BOBOT B*) RISIKO NON-KLINIS BERDASARKAN KATEGORI</h3>
-                                            <table className="w-full border-collapse border border-black text-[7px] mb-4">
-                                                <thead className="bg-slate-100 font-bold text-center">
-                                                    <tr><th className="border border-black">Level</th><th className="border border-black">Keuangan / Finansial</th><th className="border border-black">Reputasi / Citra Organisasi</th><th className="border border-black">Hukum / Legal & Kepatuhan</th><th className="border border-black">Operasional & Pelayanan</th><th className="border border-black">K3 Pegawai / Keselamatan Fasilitas</th></tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr><td className="border border-black font-bold text-center">1</td><td className="border border-black">Kerugian &lt; 0.1% anggaran.</td><td className="border border-black">Keluhan/rumor internal yang diselesaikan langsung.</td><td className="border border-black">Teguran lisan / pelanggaran SOP minor.</td><td className="border border-black">Layanan operasional terhenti &lt; 1 jam.</td><td className="border border-black">Luka lecet / butuh rawat jalan ringan (P3K).</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">2</td><td className="border border-black">Kerugian 0.1% - 1% anggaran.</td><td className="border border-black">Pemberitaan di media lokal kecil / Medsos personal.</td><td className="border border-black">Teguran tertulis / teguran instansi pengawas.</td><td className="border border-black">Layanan Poli/Unit tertentu terhenti 1 - 8 jam.</td><td className="border border-black">Perawatan medis lanjutan tanpa rawat inap.</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">3</td><td className="border border-black">Kerugian 1% - 5% anggaran.</td><td className="border border-black">Pemberitaan media massa lokal / keluhan kelompok masy.</td><td className="border border-black">Somasi pihak luar / potensi penurunan status kelas.</td><td className="border border-black">Layanan Fasyankes terganggu 8 - 24 jam.</td><td className="border border-black">Pegawai cedera perlu rawat inap berhari-hari.</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">4</td><td className="border border-black">Kerugian 5% - 10% anggaran.</td><td className="border border-black">Pemberitaan media nasional / tuntutan publik meluas.</td><td className="border border-black">Tuntutan perdata/pidana ke pengadilan / Gagal Akreditasi.</td><td className="border border-black">Layanan Fasyankes terhenti total &gt; 24 jam.</td><td className="border border-black">Pegawai mengalami cacat permanen / kerusakan fas. besar.</td></tr>
-                                                    <tr><td className="border border-black font-bold text-center">5</td><td className="border border-black">Kerugian &gt; 10% anggaran.</td><td className="border border-black">Pemberitaan/viral tingkat nasional & Internasional.</td><td className="border border-black">Pimpinan dipidana / Izin Operasional Fasyankes dicabut.</td><td className="border border-black">Lumpuh total (Tutup sementara) / Dampak ekosistem luas.</td><td className="border border-black">Kematian pegawai akibat kecelakaan kerja / Bencana.</td></tr>
-                                                </tbody>
-                                            </table>
-
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 4: MATRIKS GRADING RISIKO (D x K)</h3>
-                                                    <table className="w-full border-collapse border border-black text-[7px] text-center font-bold">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td rowSpan="6" className="w-6 rotate-180 transform bg-slate-100 border border-black" style={{ writingMode: 'vertical-rl' }}>KEMUNGKINAN (K)</td>
-                                                                <td className="border border-black bg-slate-50">5</td><td className="border border-black bg-yellow-400 text-slate-900">5</td><td className="border border-black bg-yellow-400 text-slate-900">10</td><td className="border border-black bg-orange-500 text-white">15</td><td className="border border-black bg-red-600 text-white">20</td><td className="border border-black bg-red-600 text-white">25</td>
-                                                            </tr>
-                                                            <tr><td className="border border-black bg-slate-50">4</td><td className="border border-black bg-green-500 text-white">4</td><td className="border border-black bg-yellow-400 text-slate-900">8</td><td className="border border-black bg-yellow-400 text-slate-900">12</td><td className="border border-black bg-orange-500 text-white">16</td><td className="border border-black bg-red-600 text-white">20</td></tr>
-                                                            <tr><td className="border border-black bg-slate-50">3</td><td className="border border-black bg-green-500 text-white">3</td><td className="border border-black bg-green-500 text-white">6</td><td className="border border-black bg-yellow-400 text-slate-900">9</td><td className="border border-black bg-yellow-400 text-slate-900">12</td><td className="border border-black bg-orange-500 text-white">15</td></tr>
-                                                            <tr><td className="border border-black bg-slate-50">2</td><td className="border border-black bg-blue-500 text-white">2</td><td className="border border-black bg-green-500 text-white">4</td><td className="border border-black bg-green-500 text-white">6</td><td className="border border-black bg-yellow-400 text-slate-900">8</td><td className="border border-black bg-yellow-400 text-slate-900">10</td></tr>
-                                                            <tr><td className="border border-black bg-slate-50">1</td><td className="border border-black bg-blue-500 text-white">1</td><td className="border border-black bg-blue-500 text-white">2</td><td className="border border-black bg-green-500 text-white">3</td><td className="border border-black bg-green-500 text-white">4</td><td className="border border-black bg-yellow-400 text-slate-900">5</td></tr>
-                                                            <tr><td className="border border-black bg-slate-100">x</td><td className="border border-black bg-slate-50">1</td><td className="border border-black bg-slate-50">2</td><td className="border border-black bg-slate-50">3</td><td className="border border-black bg-slate-50">4</td><td className="border border-black bg-slate-50">5</td></tr>
-                                                            <tr><td colSpan="2" className="border border-black bg-slate-100">DAMPAK (D) &rarr;</td><td className="border border-black bg-slate-50 text-[6px]">Sgt Ringan</td><td className="border border-black bg-slate-50 text-[6px]">Ringan</td><td className="border border-black bg-slate-50 text-[6px]">Sedang</td><td className="border border-black bg-slate-50 text-[6px]">Berat</td><td className="border border-black bg-slate-50 text-[6px]">Sgt Berat</td></tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TINDAKAN SESUAI TINGKAT (BAND) RISIKO</h3>
-                                                    <table className="w-full border-collapse border border-black text-[7px]">
-                                                        <thead className="bg-slate-100 font-bold text-center">
-                                                            <tr><th className="border border-black">Skor</th><th className="border border-black">Tingkat</th><th className="border border-black">Tindakan & Penanggung Jawab</th></tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr><td className="border border-black text-center font-black bg-red-600 text-white">15 - 25</td><td className="border border-black font-bold">Sangat Tinggi (Ekstrim)</td><td className="border border-black">Tindakan segera (RCA). Perhatian Direktur / Kepala Fasyankes.</td></tr>
-                                                            <tr><td className="border border-black text-center font-black bg-orange-500 text-white">15 - 16</td><td className="border border-black font-bold">Tinggi (High)</td><td className="border border-black">Tindakan terencana (RCA). Perhatian Kepala Bidang / PJ Divisi.</td></tr>
-                                                            <tr><td className="border border-black text-center font-black bg-yellow-400 text-slate-900">8 - 12</td><td className="border border-black font-bold">Sedang (Moderate)</td><td className="border border-black">Lakukan penilaian mandiri (Investigasi Sederhana). PJ Kepala Unit.</td></tr>
-                                                            <tr><td className="border border-black text-center font-black bg-green-500 text-white">3 - 6</td><td className="border border-black font-bold">Rendah (Low)</td><td className="border border-black">Kelola dengan prosedur rutin (Investigasi Sederhana ringan).</td></tr>
-                                                            <tr><td className="border border-black text-center font-black bg-blue-500 text-white">1 - 2</td><td className="border border-black font-bold">Sangat Rendah</td><td className="border border-black">Risiko dapat diterima (Dibawah selera risiko). Lakukan pemantauan.</td></tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        )}
-
                                     </div>
                                 </div>
                             )}
