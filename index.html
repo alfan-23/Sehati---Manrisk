@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMR AI Pro - Manajemen Risiko Kemenkes RI</title>
+    <title>SIMR AI Pro - Manajemen Risiko Bidang Kesehatan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -171,7 +171,6 @@
 
         const generateKode = (kategori, index) => `${kategori ? kategori.substring(0, 3).toUpperCase() : 'RSK'}-${String(index).padStart(2, '0')}`;
 
-        // PERBAIKAN: Fungsi AI yang menggunakan MimeType (ANTI ERROR JSON 1034)
         const callGeminiJson = async (prompt, schemaFormat, userApiKey, activeModelName) => {
             if (!userApiKey) throw new Error("API Key belum terhubung dengan Portal.");
             
@@ -191,7 +190,7 @@
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ 
                             contents: [{ parts: [{ text: fullPrompt }] }],
-                            generationConfig: { responseMimeType: "application/json" } // KUNCI ANTI ERROR
+                            generationConfig: { responseMimeType: "application/json" } 
                         })
                     });
                     
@@ -226,11 +225,9 @@
             const handlePrint = () => { showToast("Menyiapkan dokumen..."); setTimeout(() => { window.print(); }, 1000); };
             const isKlinis = (kat) => kat === 'Klinis / Keselamatan Pasien';
 
-            // FUNGSI CEK API KEY MANRISK
             const verifyKey = async () => {
                 if (!apiKey) { 
                     setActiveModel("API Key Kosong"); 
-                    showToast("⚠️ Menunggu sinkronisasi API Key dari Portal."); 
                     return; 
                 }
                 setActiveModel("Mengecek koneksi...");
@@ -241,12 +238,23 @@
                     const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent") && m.name.includes("gemini"));
                     let selected = validModels.find(m => m.name.includes('1.5-flash')) || validModels.find(m => m.name.includes('flash')) || validModels[0];
                     setActiveModel(selected.name.replace('models/', ''));
-                    showToast("✅ API Key Valid & Siap Digunakan!");
                 } catch (e) {
                     setActiveModel("Error Koneksi API");
-                    showToast("❌ Gagal terhubung dengan server AI.");
                 }
             };
+
+            // Menerima update API Key dari Dashboard secara otomatis
+            useEffect(() => {
+                const handleMessage = (event) => {
+                    if (event.data && event.data.type === 'UPDATE_API_KEY') {
+                        setApiKey(event.data.key);
+                        sessionStorage.setItem('sehati_api_key', event.data.key);
+                        showToast("🔄 Sesi dipertahankan! API Key diputar otomatis.");
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+                return () => window.removeEventListener('message', handleMessage);
+            }, []);
 
             useEffect(() => {
                 if (apiKey) verifyKey();
@@ -424,7 +432,7 @@
                     <aside className={`no-print ${isSidebarOpen ? 'w-72' : 'w-20'} bg-slate-900 text-slate-400 transition-all duration-300 flex flex-col h-screen sticky top-0 shrink-0 z-50`}>
                         <div className="p-6 text-white font-black text-xl flex items-center gap-3 border-b border-slate-800 relative">
                             <div className="bg-emerald-500 p-2 rounded-lg text-slate-900"><Icon name="BrainCircuit" /></div>
-                            {isSidebarOpen && <span className="uppercase">SIMR AI PRO</span>}
+                            {isSidebarOpen && <span className="uppercase text-sm">SIMR Bidang Kesehatan</span>}
                         </div>
                         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="absolute -right-3 top-20 bg-emerald-500 text-white p-1 rounded-full border-2 border-white z-10"><Icon name={isSidebarOpen ? "ChevronLeft" : "ChevronRight"} className="w-4 h-4" /></button>
                         
@@ -447,8 +455,7 @@
                             <input type="file" accept=".txt" ref={fileInputRef} onChange={handleLoadDraft} className="hidden" />
                         </nav>
                         
-                        {/* TOMBOL CEK API KEY DI MANRISK */}
-                        <div className="p-4 bg-slate-950 border-t border-slate-800">
+                        <div className="p-4 bg-slate-950 border-t border-slate-800 text-center">
                             {isSidebarOpen ? (
                                 <div className="flex flex-col gap-2">
                                     <p className="text-[10px] text-slate-400 font-mono text-center mb-1">
