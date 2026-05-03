@@ -53,8 +53,16 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const keyFromUrl = urlParams.get('key');
+        const modelFromUrl = urlParams.get('model');
+        
         if (keyFromUrl) {
             sessionStorage.setItem('sehati_api_key', keyFromUrl);
+        }
+        if (modelFromUrl) {
+            sessionStorage.setItem('sehati_ai_model', modelFromUrl);
+        }
+        
+        if (keyFromUrl || modelFromUrl) {
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({path: cleanUrl}, '', cleanUrl);
         }
@@ -171,7 +179,11 @@
 
         const generateKode = (kategori, index) => `${kategori ? kategori.substring(0, 3).toUpperCase() : 'RSK'}-${String(index).padStart(2, '0')}`;
 
-        const callGeminiJson = async (prompt, schemaFormat, userApiKey, activeModelName) => {
+        // FUNGSI API GENERATOR DENGAN SIKLUS ROTASI (AUTO-RETRY DARI DASHBOARD)
+        const callGeminiJson = async (prompt, schemaFormat) => {
+            const userApiKey = sessionStorage.getItem('sehati_api_key');
+            let activeModelName = sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash';
+
             if (!userApiKey) throw new Error("API Key belum terhubung dengan Portal.");
             
             let modelToUse = 'gemini-1.5-flash';
@@ -183,7 +195,7 @@
             const fullPrompt = `TUGAS: Anda adalah asisten pakar Manajemen Risiko Fasyankes. Berikan hasil DALAM FORMAT JSON.\n\nSKEMA JSON:\n${JSON.stringify(schemaFormat, null, 2)}\n\nPERINTAH:\n${prompt}`;
             
             let delay = 1000;
-            for (let retry = 0; retry < 3; retry++) { 
+            for (let retry = 0; retry < 5; retry++) { 
                 try {
                     const response = await fetch(url, { 
                         method: 'POST', 
@@ -195,19 +207,29 @@
                     });
                     
                     if (!response.ok) {
-                        if (response.status === 429) {
-                            window.parent.postMessage({ type: 'API_ERROR', code: 429 }, '*');
-                            throw new Error("Server sibuk. Rotasi API otomatis berjalan.");
+                        // Lempar error untuk ditangkap Dashboard agar dilakukan Rotasi Otomatis
+                        if (response.status === 429 || response.status === 404 || response.status === 403 || response.status >= 500) {
+                            if (window.parent !== window) {
+                                window.parent.postMessage({ type: 'API_ERROR', code: response.status }, '*');
+                            }
+                            throw new Error("API_FAIL_ROTATE");
                         }
-                        if (response.status === 400) throw new Error("API Key tidak valid.");
+                        if (response.status === 400) throw new Error("API Key tidak valid atau Format Prompt salah.");
                         throw new Error(`HTTP Error ${response.status}`);
                     }
                     
                     const data = await response.json();
                     let textResponse = data.candidates[0].content.parts[0].text;
+                    
+                    // Beri tahu Dashboard bahwa proses API sukses
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'API_SUCCESS' }, '*');
+                    }
+                    
                     return JSON.parse(textResponse); 
                 } catch (e) {
-                    if (retry === 2) throw e;
+                    if (e.message === "API_FAIL_ROTATE") throw e; // Berhenti retry mandiri, lempar ke React UI
+                    if (retry === 4) throw e;
                     await new Promise(res => setTimeout(res, delay)); delay *= 2; 
                 }
             }
@@ -218,8 +240,11 @@
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [toast, setToast] = useState("");
             const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('sehati_api_key') || '');
-            const [activeModel, setActiveModel] = useState('Memuat...');
+            const [activeModel, setActiveModel] = useState(() => sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash');
             const fileInputRef = useRef(null);
+            
+            // Ref untuk menyimpan fungsi yang akan dipanggil ulang (Auto-Retry)
+            const isWaitingForRetry = useRef(null);
 
             const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 5000); };
             const handlePrint = () => { showToast("Menyiapkan dokumen..."); setTimeout(() => { window.print(); }, 1000); };
@@ -243,22 +268,43 @@
                 }
             };
 
-            // Menerima update API Key dari Dashboard secara otomatis
+            // Listener Komunikasi dari Dashboard
             useEffect(() => {
                 const handleMessage = (event) => {
-                    if (event.data && event.data.type === 'UPDATE_API_KEY') {
+                    if (event.data && event.data.type === 'UPDATE_CONFIG') {
                         setApiKey(event.data.key);
+                        setActiveModel(event.data.model || 'gemini-2.5-flash');
                         sessionStorage.setItem('sehati_api_key', event.data.key);
-                        showToast("🔄 Sesi dipertahankan! API Key diputar otomatis.");
+                        sessionStorage.setItem('sehati_ai_model', event.data.model || 'gemini-2.5-flash');
+                        
+                        // Jalankan fungsi auto-retry jika ada yang tertunda
+                        if (isWaitingForRetry.current) {
+                            showToast(`🔄 Melanjutkan proses dengan model ${event.data.model}...`);
+                            const retryFunc = isWaitingForRetry.current;
+                            isWaitingForRetry.current = null;
+                            setTimeout(() => retryFunc(), 1000);
+                        } else {
+                            console.log(`[Manrisk] Konfigurasi Diperbarui. Model: ${event.data.model}`);
+                        }
+                    }
+                    
+                    if (event.data && event.data.type === 'STOP_RETRY') {
+                        isWaitingForRetry.current = null;
+                        showToast("❌ Siklus Terhenti: Seluruh API Key dan Model gagal memproses.");
+                        setTimeout(() => {
+                            alert("Sistem telah mencoba semua Slot API Key dan Model AI secara otomatis, namun semuanya kehabisan kuota atau gagal.\n\nSilakan periksa konfigurasi API Key Anda di Dashboard.");
+                        }, 500);
                     }
                 };
+                
                 window.addEventListener('message', handleMessage);
+                
+                if (!sessionStorage.getItem('sehati_api_key') && window.parent !== window) {
+                    window.parent.postMessage({ type: 'REQUEST_CONFIG' }, '*');
+                }
+                
                 return () => window.removeEventListener('message', handleMessage);
             }, []);
-
-            useEffect(() => {
-                if (apiKey) verifyKey();
-            }, [apiKey]);
 
             const [profil, setProfil] = useState({ faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
             const [konteks, setKonteks] = useState([{ 
@@ -346,24 +392,34 @@
 
             const handleAIGoals = async (cId) => {
                 const c = konteks.find(x => x.id === cId);
-                if(!c.rincian) return showToast("⚠️ Pilih 'Rincian Unit' ILP terlebih dahulu.");
+                if(!c || !c.rincian) return showToast("⚠️ Pilih 'Rincian Unit' ILP terlebih dahulu.");
                 showToast("⚡ AI sedang merangkum pilihan sasaran...");
                 try {
-                    const res = await callGeminiJson(`Berikan 3 variasi Tujuan dan Sasaran Mutu Kinerja untuk kegiatan "${c.rincian}" Puskesmas.`, { options: [{ tujuan: "string", sasaran: "string" }] }, apiKey, activeModel);
-                    setKonteks(konteks.map(x => x.id === cId ? { ...x, aiGoalOptions: res.options } : x));
-                } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
+                    const res = await callGeminiJson(`Berikan 3 variasi Tujuan dan Sasaran Mutu Kinerja untuk kegiatan "${c.rincian}" Puskesmas.`, { options: [{ tujuan: "string", sasaran: "string" }] });
+                    setKonteks(prev => prev.map(x => x.id === cId ? { ...x, aiGoalOptions: res.options } : x));
+                } catch (e) { 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIGoals(cId);
+                    } else { showToast(`❌ Gagal: ${e.message}`); }
+                }
             };
 
             const handleAIGenerateRisks = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.idKonteks || !r.kategori) return showToast("⚠️ Pilih 'Konteks Unit' & 'Kategori Risiko'.");
+                if(!r || !r.idKonteks || !r.kategori) return showToast("⚠️ Pilih 'Konteks Unit' & 'Kategori Risiko'.");
                 const c = konteks.find(ctx => ctx.id === r.idKonteks);
                 showToast("⚡ AI menyusun opsi identifikasi risiko...");
                 try {
                     const panduan = isKlinis(r.kategori) ? "Klinis b=1." : "Non-Klinis b=1-5.";
-                    const res = await callGeminiJson(`Buat 3 opsi risiko KHUSUS kategori "${r.kategori}" kegiatan "${c.rincian}". \n${panduan}`, { options: [{ sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] }, apiKey, activeModel);
+                    const res = await callGeminiJson(`Buat 3 opsi risiko KHUSUS kategori "${r.kategori}" kegiatan "${c?.rincian || ''}". \n${panduan}`, { options: [{ sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRiskOptions: res.options } : item));
-                } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
+                } catch (e) { 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIGenerateRisks(rId);
+                    } else { showToast(`❌ Gagal: ${e.message}`); }
+                }
             };
 
             const applyAiRiskOption = (rId, opt) => {
@@ -382,22 +438,32 @@
 
             const handleAIRCA = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.identifikasi.pernyataan) return showToast("⚠️ Pernyataan Risiko kosong!");
+                if(!r || !r.identifikasi.pernyataan) return showToast("⚠️ Pernyataan Risiko kosong!");
                 showToast("⚡ AI membedah akar masalah (5-Why)...");
                 try {
-                    const res = await callGeminiJson(`Lakukan RCA mendalam 5-Why untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik/kebijakan.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Man/Money/Material/Method/Machine" } }, apiKey, activeModel);
+                    const res = await callGeminiJson(`Lakukan RCA mendalam 5-Why untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik/kebijakan.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Man/Money/Material/Method/Machine" } });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, rca: res.rca } : item));
-                } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
+                } catch (e) { 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIRCA(rId);
+                    } else { showToast(`❌ Gagal: ${e.message}`); }
+                }
             };
 
             const handleAIRTP = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r.rca.akar) return showToast("⚠️ Lakukan RCA dahulu!");
+                if(!r || !r.rca.akar) return showToast("⚠️ Lakukan RCA dahulu!");
                 showToast("⚡ AI menyusun opsi saran penanganan (RTP)...");
                 try {
-                    const res = await callGeminiJson(`Beri 3 saran rencana penanganan efektif (RTP) mengatasi akar masalah: "${r.rca.akar}".`, { options: [{ opsi: "Pilih: Reduksi/Transfer/Hindari", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan" }] }, apiKey, activeModel);
+                    const res = await callGeminiJson(`Beri 3 saran rencana penanganan efektif (RTP) mengatasi akar masalah: "${r.rca.akar}".`, { options: [{ opsi: "Pilih: Reduksi/Transfer/Hindari", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRtpOptions: res.options } : item));
-                } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
+                } catch (e) { 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIRTP(rId);
+                    } else { showToast(`❌ Gagal: ${e.message}`); }
+                }
             };
 
             const applyAiRtpOption = (rId, opt) => {
@@ -415,14 +481,20 @@
 
             const handleAIMonitoring = async (rId, phase) => {
                 const r = risiko.find(x => x.id === rId);
+                if(!r) return;
                 showToast(`⚡ AI menyusun opsi ${phase}...`);
                 try {
                     let p = phase === 'Realisasi' ? `3 tindakan nyata untuk rencana: "${r.rtp.uraian}".` 
                           : phase === 'Hambatan' ? `3 hambatan saat merealisasikan: "${r.monitoring.realisasi}".` 
                           : `3 usulan mengatasi hambatan: "${r.monitoring.hambatan}".`;
-                    const res = await callGeminiJson(p, { options: [{ teks: "string" }] }, apiKey, activeModel);
+                    const res = await callGeminiJson(p, { options: [{ teks: "string" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, [`ai${phase}Options`]: res.options } : item));
-                } catch (e) { showToast(`❌ Gagal: ${e.message}`); }
+                } catch (e) { 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIMonitoring(rId, phase);
+                    } else { showToast(`❌ Gagal: ${e.message}`); }
+                }
             };
 
             return (
