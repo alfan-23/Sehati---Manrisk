@@ -34,7 +34,6 @@
             .print-section:last-child { page-break-after: auto; }
             .print-appendix { display: block; page-break-before: always; width: 100%; }
             
-            /* PEMAKSAAN WARNA UNTUK CETAK PDF (BACKGROUND & TEXT) */
             .print-appendix, .print-appendix *, .print-color-exact {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -292,7 +291,6 @@
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [toast, setToast] = useState("");
             
-            // UI Input Manual Kunci API dipertahankan untuk pemakaian Standalone
             const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('sehati_api_key') || '');
             const [activeModel, setActiveModel] = useState(() => sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash');
             const fileInputRef = useRef(null);
@@ -321,7 +319,6 @@
                 }
             };
 
-            // Listener Komunikasi dari Dashboard
             useEffect(() => {
                 const handleMessage = (event) => {
                     if (event.data && event.data.type === 'UPDATE_CONFIG') {
@@ -606,12 +603,13 @@
                 }
             };
 
+            // KODE BARU: MENAMBAHKAN "ATURAN MUTLAK" KE PROMPT AGAR SKOR RESIDUAL SELALU LEBIH RENDAH
             const handleAIRTP = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
                 if(!r || !r.rca.akar) return showToast("⚠️ Lakukan RCA dahulu!");
                 showToast("⚡ AI menyusun opsi saran penanganan (RTP)...");
                 try {
-                    const res = await callGeminiJson(`Beri 3 saran rencana penanganan efektif (RTP) mengatasi akar masalah: "${r.rca.akar}".`, { options: [{ opsi: "Pilih: Reduksi/Transfer/Hindari", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan" }] });
+                    const res = await callGeminiJson(`Beri 3 saran rencana penanganan efektif (RTP) mengatasi akar masalah: "${r.rca.akar}".\n\nATURAN MUTLAK: Skor Inherent (awal) saat ini adalah Dampak (D)=${r.analisa.d} dan Kemungkinan (K)=${r.analisa.k}. Nilai target Residual Dampak (rd) dan Residual Kemungkinan (rk) HARUS berupa angka 1-5 dan nilainya WAJIB LEBIH KECIL atau sama dengan skor Inherent tersebut agar penanganan terbukti menurunkan risiko!`, { options: [{ opsi: "Pilih: Reduksi kerugian/Transfer/Hindari", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRtpOptions: res.options } : item));
                 } catch (e) { 
                     if(e.message === "API_FAIL_ROTATE") {
@@ -930,7 +928,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {/* Semua risiko masuk, filter disembunyikan dihapus */}
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRtpOptions?.length > 0 && (
@@ -982,7 +979,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {/* Semua risiko masuk, filter disembunyikan dihapus */}
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRealisasiOptions?.length > 0 && <tr><td colSpan="7" className="p-2 bg-blue-50 border"><div className="grid grid-cols-3 gap-2">{r.aiRealisasiOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.realisasi', opt.teks); updateRisiko(r.id, 'aiRealisasiOptions', []);}} className="p-3 bg-white border rounded-xl cursor-pointer font-medium hover:shadow">{opt.teks}</div>)}</div></td></tr>}
