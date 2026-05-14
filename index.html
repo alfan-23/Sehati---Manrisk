@@ -72,7 +72,7 @@
         const { useState, useEffect, useRef } = React;
 
         const Icon = ({ name, className = "w-5 h-5" }) => {
-            return <i className={`fas fa-${name === 'Building2' ? 'building' : name === 'AlertTriangle' ? 'exclamation-triangle' : name === 'Target' ? 'bullseye' : name === 'Search' ? 'search' : name === 'Printer' ? 'print' : name === 'BrainCircuit' ? 'brain' : name === 'Save' ? 'save' : name === 'Upload' ? 'upload' : name === 'Activity' ? 'chart-line' : name === 'Sparkles' ? 'wand-magic-sparkles' : name === 'Trash2' ? 'trash' : name === 'ChevronLeft' ? 'chevron-left' : name === 'ChevronRight' ? 'chevron-right' : 'circle'} ${className}`}></i>;
+            return <i className={`fas fa-${name === 'Building2' ? 'building' : name === 'AlertTriangle' ? 'exclamation-triangle' : name === 'Target' ? 'bullseye' : name === 'Search' ? 'search' : name === 'Printer' ? 'print' : name === 'BrainCircuit' ? 'brain' : name === 'Save' ? 'save' : name === 'Upload' ? 'upload' : name === 'Activity' ? 'chart-line' : name === 'Sparkles' ? 'wand-magic-sparkles' : name === 'Trash2' ? 'trash' : name === 'ChevronLeft' ? 'chevron-left' : name === 'ChevronRight' ? 'chevron-right' : name === 'Plus' ? 'plus' : 'circle'} ${className}`}></i>;
         };
 
         const ILP_DATABASE = {
@@ -166,6 +166,47 @@
             }
         };
 
+        const DB_KLINIK = {
+            "KLINIK": {
+                "Layanan Di Klinik": {
+                    "Daftar Unit": [
+                        "Loket Pendaftaran / Kasir", "Rekam Medis", "Poli Pemeriksaan Umum", "Poli Pemeriksaan Gigi & Mulut",
+                        "Poli KIA / Keluarga Berencana", "Poli Spesialis Penyakit Dalam (Klinik Utama)", "Poli Spesialis Anak (Klinik Utama)",
+                        "Poli Spesialis Obgyn (Klinik Utama)", "Ruang Tindakan / UGD Klinik", "Ruang Bersalin / Pelayanan Melahirkan",
+                        "Ruang Observasi / Recovery Room", "Ruang Rawat Inap (Klinik Rawat Inap)", "Instalasi Farmasi / Penyerahan Obat",
+                        "Gudang Obat / Alkes", "Laboratorium Klinik Dasar", "Ruang Sterilisasi Alat Medis", "Pengelolaan Limbah / TPS B3",
+                        "Cleaning Service / Tata Graha", "Manajemen / Tata Usaha", "Fasilitas Umum (Ruang Tunggu, Toilet)",
+                        "Keamanan / Parkir / Security", "Ambulans Klinik"
+                    ]
+                }
+            }
+        };
+
+        const DB_RS = {
+            "RUMAH SAKIT": {
+                "Layanan Di RS": {
+                    "Daftar Unit": [
+                        "Instalasi Gawat Darurat (IGD)", "Rawat Jalan / Poliklinik Spesialis", "Rawat Jalan / Poliklinik Gigi & Mulut",
+                        "Rawat Inap (Bangsal Umum)", "Rawat Inap (Isolasi / Infeksius)", "Kamar Operasi (OK) / Bedah Sentral",
+                        "Ruang Bersalin (VK)", "Perinatologi / Neonatologi", "Intensive Care Unit (ICU)", "NICU / PICU",
+                        "Hemodialisa (Cuci Darah)", "Cath Lab", "Rehabilitasi Medik / Fisioterapi", "Instalasi Radiologi / Imaging",
+                        "Laboratorium / Patologi Klinik", "Patologi Anatomi", "Instalasi Farmasi / Gudang Obat", "Instalasi Gizi / Dapur Utama",
+                        "Bank Darah RS (BDRS) / Transfusi Darah", "Rekam Medis & Pendaftaran", "CSSD (Sterilisasi Sentral)",
+                        "Laundry / Pencucian Linen", "Sanitasi / Pengelolaan Limbah (TPS B3/IPAL)", "IPSRS / Bengkel Fasilitas RS",
+                        "Kamar Jenazah / Pemulasaraan", "Ambulans & Transportasi Medis", "Gas Medis / Sentral Oksigen",
+                        "Keamanan / Security / Parkir", "Cleaning Service / Tata Graha", "Administrasi / Manajemen / Direksi",
+                        "K3RS / Komite PPI / Mutu", "Fasilitas Umum / Area Luar Gedung"
+                    ]
+                }
+            }
+        };
+
+        const getActiveDB = (jenisFaskes) => {
+            if (jenisFaskes === 'Klinik') return DB_KLINIK;
+            if (jenisFaskes === 'Rumah Sakit') return DB_RS;
+            return ILP_DATABASE;
+        };
+
         const KATEGORI_RISIKO = ["Operasional", "Klinis / Keselamatan Pasien", "Kepatuhan", "Strategis", "Kebijakan", "Reputasi", "Fraud", "Legal"];
         const OPSI_PENANGANAN = ["Hindari risiko", "Cegah kerugian", "Reduksi kerugian", "Segregasi", "Contractual Transfer"];
 
@@ -179,7 +220,7 @@
 
         const generateKode = (kategori, index) => `${kategori ? kategori.substring(0, 3).toUpperCase() : 'RSK'}-${String(index).padStart(2, '0')}`;
 
-        // FUNGSI API GENERATOR DENGAN SIKLUS ROTASI (AUTO-RETRY DARI DASHBOARD)
+        // FUNGSI API GENERATOR DENGAN SIKLUS ROTASI (TERHUBUNG KE DASHBOARD)
         const callGeminiJson = async (prompt, schemaFormat) => {
             const userApiKey = sessionStorage.getItem('sehati_api_key');
             let activeModelName = sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash';
@@ -207,7 +248,6 @@
                     });
                     
                     if (!response.ok) {
-                        // Lempar error untuk ditangkap Dashboard agar dilakukan Rotasi Otomatis
                         if (response.status === 429 || response.status === 404 || response.status === 403 || response.status >= 500) {
                             if (window.parent !== window) {
                                 window.parent.postMessage({ type: 'API_ERROR', code: response.status }, '*');
@@ -221,14 +261,13 @@
                     const data = await response.json();
                     let textResponse = data.candidates[0].content.parts[0].text;
                     
-                    // Beri tahu Dashboard bahwa proses API sukses
                     if (window.parent !== window) {
                         window.parent.postMessage({ type: 'API_SUCCESS' }, '*');
                     }
                     
                     return JSON.parse(textResponse); 
                 } catch (e) {
-                    if (e.message === "API_FAIL_ROTATE") throw e; // Berhenti retry mandiri, lempar ke React UI
+                    if (e.message === "API_FAIL_ROTATE") throw e; 
                     if (retry === 4) throw e;
                     await new Promise(res => setTimeout(res, delay)); delay *= 2; 
                 }
@@ -239,11 +278,11 @@
             const [step, setStep] = useState(1);
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [toast, setToast] = useState("");
+            
             const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('sehati_api_key') || '');
             const [activeModel, setActiveModel] = useState(() => sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash');
             const fileInputRef = useRef(null);
             
-            // Ref untuk menyimpan fungsi yang akan dipanggil ulang (Auto-Retry)
             const isWaitingForRetry = useRef(null);
 
             const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 5000); };
@@ -268,7 +307,6 @@
                 }
             };
 
-            // Listener Komunikasi dari Dashboard
             useEffect(() => {
                 const handleMessage = (event) => {
                     if (event.data && event.data.type === 'UPDATE_CONFIG') {
@@ -277,14 +315,11 @@
                         sessionStorage.setItem('sehati_api_key', event.data.key);
                         sessionStorage.setItem('sehati_ai_model', event.data.model || 'gemini-2.5-flash');
                         
-                        // Jalankan fungsi auto-retry jika ada yang tertunda
                         if (isWaitingForRetry.current) {
                             showToast(`🔄 Melanjutkan proses dengan model ${event.data.model}...`);
                             const retryFunc = isWaitingForRetry.current;
                             isWaitingForRetry.current = null;
                             setTimeout(() => retryFunc(), 1000);
-                        } else {
-                            console.log(`[Manrisk] Konfigurasi Diperbarui. Model: ${event.data.model}`);
                         }
                     }
                     
@@ -306,12 +341,53 @@
                 return () => window.removeEventListener('message', handleMessage);
             }, []);
 
-            const [profil, setProfil] = useState({ faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
+            const [profil, setProfil] = useState({ jenisFaskes: 'Puskesmas', faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
             const [konteks, setKonteks] = useState([{ 
                 id: 1, klaster: 'LINTAS KLASTER', program: 'Program 1: Gawat Darurat', kegiatan: 'Kegiatan: Pelayanan IGD', rincian: 'Triase', 
-                tujuan: 'Menilai tingkat kegawatdaruratan pasien dengan cepat', sasaran: 'Response time triase < 5 menit', aiGoalOptions: [] 
+                tujuan: 'Menilai tingkat kegawatdaruratan pasien dengan cepat', sasaran: 'Response time triase < 5 menit', 
+                kategoriSaran: ['Klinis / Keselamatan Pasien', 'Operasional'], aiGoalOptions: [] 
             }]);
             
+            const [customUnits, setCustomUnits] = useState(() => {
+                try {
+                    return JSON.parse(localStorage.getItem('simr_custom_units')) || {};
+                } catch {
+                    return {};
+                }
+            });
+            const [customUnitInputs, setCustomUnitInputs] = useState({}); 
+
+            useEffect(() => {
+                localStorage.setItem('simr_custom_units', JSON.stringify(customUnits));
+            }, [customUnits]);
+
+            // Auto-update Konteks saat Jenis Faskes berubah agar konsisten
+            useEffect(() => {
+                setKonteks(prevKonteks => prevKonteks.map(k => {
+                    let activeKlaster = k.klaster;
+                    let activeProgram = k.program;
+                    let activeKegiatan = k.kegiatan;
+                    
+                    if (profil.jenisFaskes === 'Klinik') {
+                        activeKlaster = 'KLINIK';
+                        activeProgram = 'Layanan Di Klinik';
+                        activeKegiatan = 'Daftar Unit';
+                    } else if (profil.jenisFaskes === 'Rumah Sakit') {
+                        activeKlaster = 'RUMAH SAKIT';
+                        activeProgram = 'Layanan Di RS';
+                        activeKegiatan = 'Daftar Unit';
+                    } else if (profil.jenisFaskes === 'Puskesmas') {
+                        if (activeKlaster === 'KLINIK' || activeKlaster === 'RUMAH SAKIT') {
+                            activeKlaster = '';
+                            activeProgram = '';
+                            activeKegiatan = '';
+                            k.rincian = ''; 
+                        }
+                    }
+                    return { ...k, klaster: activeKlaster, program: activeProgram, kegiatan: activeKegiatan };
+                }));
+            }, [profil.jenisFaskes]);
+
             const [risiko, setRisiko] = useState([
                 {
                     id: 1, idKonteks: 1, kategori: 'Operasional', area: 'Ruang Triase',
@@ -328,7 +404,7 @@
             const [printFormType, setPrintFormType] = useState('SEMUA');
 
             const handleSaveDraft = () => {
-                const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify({ profil, konteks, risiko }, null, 2)], { type: "text/plain" }));
+                const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify({ profil, konteks, risiko, customUnits }, null, 2)], { type: "text/plain" }));
                 a.download = `draft-simr-${profil.tanggal}.txt`; a.click(); showToast("✅ Draft berhasil disimpan.");
             };
             const handleLoadDraft = (e) => {
@@ -337,7 +413,10 @@
                 reader.onload = (event) => {
                     try {
                         const data = JSON.parse(event.target.result);
-                        if (data.profil) setProfil(data.profil); if (data.konteks) setKonteks(data.konteks); if (data.risiko) setRisiko(data.risiko);
+                        if (data.profil) setProfil({...data.profil, jenisFaskes: data.profil.jenisFaskes || 'Puskesmas'}); 
+                        if (data.konteks) setKonteks(data.konteks); 
+                        if (data.risiko) setRisiko(data.risiko);
+                        if (data.customUnits) setCustomUnits(data.customUnits);
                         showToast("✅ Draft berhasil dimuat.");
                     } catch (error) { showToast("❌ File rusak."); }
                 }; reader.readAsText(file); e.target.value = ""; 
@@ -379,6 +458,26 @@
                 }));
             };
 
+            const handleTambahKonteks = () => {
+                let activeKlaster = '';
+                let activeProgram = '';
+                let activeKegiatan = '';
+
+                if (profil.jenisFaskes === 'Klinik') {
+                    activeKlaster = 'KLINIK';
+                    activeProgram = 'Layanan Di Klinik';
+                    activeKegiatan = 'Daftar Unit';
+                } else if (profil.jenisFaskes === 'Rumah Sakit') {
+                    activeKlaster = 'RUMAH SAKIT';
+                    activeProgram = 'Layanan Di RS';
+                    activeKegiatan = 'Daftar Unit';
+                }
+
+                setKonteks([...konteks, {
+                    id: Date.now(), klaster: activeKlaster, program: activeProgram, kegiatan: activeKegiatan, rincian: '', tujuan: '', sasaran: '', kategoriSaran: [], aiGoalOptions: []
+                }]);
+            };
+
             const tambahRisiko = () => {
                 setRisiko([...risiko, {
                     id: Date.now(), idKonteks: '', kategori: '', area: '',
@@ -390,12 +489,51 @@
                 }]);
             };
 
+            const saveCustomUnit = (k) => {
+                const newUnitName = customUnitInputs[k.id]?.trim();
+                if(!newUnitName) return;
+
+                let activeKlaster = k.klaster;
+                let activeProgram = k.program;
+                let activeKegiatan = k.kegiatan;
+
+                if (profil.jenisFaskes === 'Klinik') {
+                    activeKlaster = 'KLINIK';
+                    activeProgram = 'Layanan Di Klinik';
+                    activeKegiatan = 'Daftar Unit';
+                } else if (profil.jenisFaskes === 'Rumah Sakit') {
+                    activeKlaster = 'RUMAH SAKIT';
+                    activeProgram = 'Layanan Di RS';
+                    activeKegiatan = 'Daftar Unit';
+                }
+
+                setCustomUnits(prev => {
+                    const next = { ...prev };
+                    const jF = profil.jenisFaskes;
+                    if(!next[jF]) next[jF] = {};
+                    if(!next[jF][activeKlaster]) next[jF][activeKlaster] = {};
+                    if(!next[jF][activeKlaster][activeProgram]) next[jF][activeKlaster][activeProgram] = {};
+                    if(!next[jF][activeKlaster][activeProgram][activeKegiatan]) next[jF][activeKlaster][activeProgram][activeKegiatan] = [];
+
+                    if(!next[jF][activeKlaster][activeProgram][activeKegiatan].includes(newUnitName)) {
+                        next[jF][activeKlaster][activeProgram][activeKegiatan].push(newUnitName);
+                    }
+                    return next;
+                });
+
+                setKonteks(konteks.map(x => x.id === k.id ? { ...x, klaster: activeKlaster, program: activeProgram, kegiatan: activeKegiatan, rincian: newUnitName } : x));
+                setCustomUnitInputs(prev => { const next = {...prev}; delete next[k.id]; return next; });
+                showToast("✅ Unit kustom berhasil disimpan secara lokal.");
+            };
+
             const handleAIGoals = async (cId) => {
                 const c = konteks.find(x => x.id === cId);
-                if(!c || !c.rincian) return showToast("⚠️ Pilih 'Rincian Unit' ILP terlebih dahulu.");
-                showToast("⚡ AI sedang merangkum pilihan sasaran...");
+                if(!c || !c.rincian) return showToast("⚠️ Pilih 'Unit / Rincian Unit' terlebih dahulu.");
+                showToast("⚡ AI sedang merangkum pilihan sasaran & kategori...");
                 try {
-                    const res = await callGeminiJson(`Berikan 3 variasi Tujuan dan Sasaran Mutu Kinerja untuk kegiatan "${c.rincian}" Puskesmas.`, { options: [{ tujuan: "string", sasaran: "string" }] });
+                    const res = await callGeminiJson(`Berikan 3 variasi Tujuan, Sasaran Mutu Kinerja, dan Rekomendasi Kategori Risiko (Pilih beberapa dari: ${KATEGORI_RISIKO.join(', ')}) untuk unit/kegiatan "${c.rincian}" di ${profil.jenisFaskes}.`, { 
+                        options: [{ tujuan: "string", sasaran: "string", kategoriSaran: ["kategori1", "kategori2"] }] 
+                    });
                     setKonteks(prev => prev.map(x => x.id === cId ? { ...x, aiGoalOptions: res.options } : x));
                 } catch (e) { 
                     if(e.message === "API_FAIL_ROTATE") {
@@ -407,12 +545,14 @@
 
             const handleAIGenerateRisks = async (rId) => {
                 const r = risiko.find(x => x.id === rId);
-                if(!r || !r.idKonteks || !r.kategori) return showToast("⚠️ Pilih 'Konteks Unit' & 'Kategori Risiko'.");
+                if(!r || !r.idKonteks) return showToast("⚠️ Pilih 'Unit' (Konteks) terlebih dahulu.");
                 const c = konteks.find(ctx => ctx.id === r.idKonteks);
                 showToast("⚡ AI menyusun opsi identifikasi risiko...");
                 try {
-                    const panduan = isKlinis(r.kategori) ? "Klinis b=1." : "Non-Klinis b=1-5.";
-                    const res = await callGeminiJson(`Buat 3 opsi risiko KHUSUS kategori "${r.kategori}" kegiatan "${c?.rincian || ''}". \n${panduan}`, { options: [{ sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] });
+                    const kategoriText = r.kategori ? `KHUSUS kategori "${r.kategori}"` : `Tentukan "kategori" paling relevan dari: [${KATEGORI_RISIKO.join(', ')}]`;
+                    const panduan = (r.kategori && isKlinis(r.kategori)) ? "Klinis b=1." : "Non-Klinis b=1-5. Jika memilih kategori Klinis / Keselamatan Pasien, b wajib 1.";
+                    
+                    const res = await callGeminiJson(`Buat 3 opsi risiko untuk kegiatan/unit "${c?.rincian || ''}". \nSyarat: ${kategoriText}. \n${panduan}`, { options: [{ kategori: "string", sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRiskOptions: res.options } : item));
                 } catch (e) { 
                     if(e.message === "API_FAIL_ROTATE") {
@@ -497,6 +637,8 @@
                 }
             };
 
+            const currentDB = getActiveDB(profil.jenisFaskes);
+
             return (
                 <div className="flex min-h-screen">
                     {toast && <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl font-bold border border-emerald-500 animate-pulse">{toast}</div>}
@@ -510,12 +652,12 @@
                         
                         <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
                             {[
-                                { id: 1, label: 'Konteks ILP', icon: 'Building2' },
+                                { id: 1, label: 'Konteks Faskes', icon: 'Building2' },
                                 { id: 2, label: 'Register (Form 1)', icon: 'AlertTriangle' },
                                 { id: 3, label: 'Akar Masalah (RCA)', icon: 'Search' },
                                 { id: 4, label: 'Profil (Form 2)', icon: 'Target' },
-                                { id: 6, label: 'Monitoring (Form 3)', icon: 'Activity' },
-                                { id: 7, label: 'Pusat Cetak', icon: 'Printer' }
+                                { id: 5, label: 'Monitoring (Form 3)', icon: 'Activity' },
+                                { id: 6, label: 'Pusat Cetak', icon: 'Printer' }
                             ].map(m => (
                                 <button key={m.id} onClick={() => setStep(m.id)} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${step === m.id ? 'bg-emerald-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
                                     <Icon name={m.icon} />{isSidebarOpen && <span className="text-sm font-semibold">{m.label}</span>}
@@ -533,6 +675,7 @@
                                     <p className="text-[10px] text-slate-400 font-mono text-center mb-1">
                                         Model: <span className={activeModel.includes('Error') || activeModel.includes('Kosong') ? 'text-red-500' : 'text-emerald-400 font-bold'}>{activeModel}</span>
                                     </p>
+                                    <input type="password" placeholder="Input API Key Gemini..." className="w-full text-[10px] p-2 rounded-lg bg-slate-800 text-white border border-slate-700 text-center outline-none" value={apiKey} onChange={(e) => { setApiKey(e.target.value); sessionStorage.setItem('sehati_api_key', e.target.value); }} />
                                     <button onClick={verifyKey} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] py-2 rounded-lg font-bold transition-colors shadow">
                                         <Icon name="Activity" className="w-3 h-3 inline mr-1" /> Cek Koneksi API
                                     </button>
@@ -545,7 +688,7 @@
                     
                     <main className="flex-1 p-4 md:p-8 overflow-x-hidden relative">
                         <header className="flex justify-between items-center mb-8 no-print">
-                            <h2 className="text-sm font-bold text-slate-400 tracking-widest uppercase">Langkah {step} / 7</h2>
+                            <h2 className="text-sm font-bold text-slate-400 tracking-widest uppercase">Langkah {step} / 6</h2>
                             <div className="bg-white px-4 py-2 rounded-xl text-xs font-bold text-emerald-600 shadow-sm border">{profil.faskes}</div>
                         </header>
 
@@ -554,7 +697,14 @@
                                 <div className="space-y-8 animate-in fade-in">
                                     <div className="bg-white p-8 rounded-3xl border-l-[12px] border-l-emerald-500 shadow-xl border">
                                         <h2 className="text-2xl font-black mb-6">Profil Fasilitas</h2>
-                                        <div className="grid md:grid-cols-4 gap-6">
+                                        <div className="grid md:grid-cols-5 gap-6">
+                                            <div><label className="text-[10px] font-black text-slate-400">JENIS FASKES</label>
+                                                <select className="input-inline font-bold select-custom text-emerald-700" value={profil.jenisFaskes} onChange={e=>setProfil({...profil, jenisFaskes: e.target.value})}>
+                                                    <option value="Puskesmas">Puskesmas</option>
+                                                    <option value="Klinik">Klinik</option>
+                                                    <option value="Rumah Sakit">Rumah Sakit</option>
+                                                </select>
+                                            </div>
                                             <div><label className="text-[10px] font-black text-slate-400">NAMA INSTANSI</label><input className="input-inline font-bold" value={profil.faskes} onChange={e=>setProfil({...profil, faskes: e.target.value})} /></div>
                                             <div><label className="text-[10px] font-black text-slate-400">PIMPINAN</label><input className="input-inline font-bold" value={profil.pimpinan} onChange={e=>setProfil({...profil, pimpinan: e.target.value})} /></div>
                                             <div><label className="text-[10px] font-black text-slate-400">TAHUN</label><input className="input-inline font-bold" value={profil.tahun} onChange={e=>setProfil({...profil, tahun: e.target.value})} /></div>
@@ -563,27 +713,77 @@
                                     </div>
                                     <div className="bg-white p-8 rounded-3xl shadow-xl border">
                                         <div className="flex justify-between items-center mb-6">
-                                            <h2 className="text-2xl font-black text-emerald-800 uppercase">Hierarki ILP</h2>
-                                            <button onClick={()=>setKonteks([...konteks, {id: Date.now(), klaster: '', program: '', kegiatan: '', rincian: '', tujuan: '', sasaran: '', aiGoalOptions: []}])} className="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold shadow-md hover:scale-105 transition-all">+ Tambah Unit</button>
+                                            <h2 className="text-2xl font-black text-emerald-800 uppercase">Hierarki {profil.jenisFaskes}</h2>
+                                            <button onClick={handleTambahKonteks} className="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold shadow-md hover:scale-105 transition-all">+ Tambah Unit</button>
                                         </div>
                                         {konteks.map(k => (
                                             <div key={k.id} className="p-6 bg-slate-50 border rounded-3xl mb-10 relative group space-y-6">
-                                                <div className="grid md:grid-cols-3 gap-6">
-                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">1. KLASTER</label><select className="input-inline select-custom font-bold" value={k.klaster} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, klaster: e.target.value, program: '', kegiatan: '', rincian: ''}:x))}><option value="">Pilih Klaster</option>{Object.keys(ILP_DATABASE).map(opt=><option key={opt}>{opt}</option>)}</select></div>
-                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">2. PROGRAM</label><select className="input-inline select-custom font-bold" disabled={!k.klaster} value={k.program} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, program: e.target.value, kegiatan: '', rincian: ''}:x))}><option value="">Pilih Program</option>{k.klaster && Object.keys(ILP_DATABASE[k.klaster] || {}).map(opt=><option key={opt}>{opt}</option>)}</select></div>
-                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">3. KEGIATAN</label><select className="input-inline select-custom font-bold text-emerald-700" disabled={!k.program} value={k.kegiatan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, kegiatan: e.target.value, rincian: ''}:x))}><option value="">Pilih Kegiatan</option>{k.program && Object.keys(ILP_DATABASE[k.klaster][k.program] || {}).map(opt=><option key={opt}>{opt}</option>)}</select></div>
-                                                </div>
-                                                <div className="grid md:grid-cols-4 gap-6 pt-4 border-t items-end">
-                                                    <div><label className="text-[10px] font-black text-slate-400 uppercase">4. RINCIAN UNIT</label><select className="input-inline font-black text-emerald-600 select-custom" disabled={!k.kegiatan} value={k.rincian} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, rincian: e.target.value}:x))}><option value="">Pilih Rincian</option>{k.kegiatan && (ILP_DATABASE[k.klaster][k.program][k.kegiatan] || []).map(opt=><option key={opt}>{opt}</option>)}</select></div>
-                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">TUJUAN STRATEGIS</label><textarea className="input-inline italic text-xs h-12" value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} /></div>
-                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN KINERJA</label><textarea className="input-inline italic text-xs h-12" value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} /></div>
-                                                    <button onClick={()=>handleAIGoals(k.id)} className="bg-blue-600 text-white p-3 rounded-2xl text-[10px] font-black flex items-center justify-center hover:scale-105 transition shadow"><Icon name="Sparkles" className="w-3 h-3 mr-2"/> SARAN AI</button>
+                                                {profil.jenisFaskes === 'Puskesmas' && (
+                                                    <div className="grid md:grid-cols-3 gap-6">
+                                                        <div><label className="text-[10px] font-black text-slate-400 uppercase">1. KLASTER / JENIS</label><select className="input-inline select-custom font-bold" value={k.klaster} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, klaster: e.target.value, program: '', kegiatan: '', rincian: ''}:x))}><option value="">Pilih Klaster</option>{Object.keys(currentDB).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                        <div><label className="text-[10px] font-black text-slate-400 uppercase">2. PROGRAM / PELAYANAN</label><select className="input-inline select-custom font-bold" disabled={!k.klaster} value={k.program} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, program: e.target.value, kegiatan: '', rincian: ''}:x))}><option value="">Pilih Program</option>{k.klaster && currentDB[k.klaster] && Object.keys(currentDB[k.klaster]).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                        <div><label className="text-[10px] font-black text-slate-400 uppercase">3. KEGIATAN / AREA</label><select className="input-inline select-custom font-bold text-emerald-700" disabled={!k.program} value={k.kegiatan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, kegiatan: e.target.value, rincian: ''}:x))}><option value="">Pilih Kegiatan</option>{k.program && currentDB[k.klaster] && currentDB[k.klaster][k.program] && Object.keys(currentDB[k.klaster][k.program]).map(opt=><option key={opt}>{opt}</option>)}</select></div>
+                                                    </div>
+                                                )}
+                                                <div className={`grid md:grid-cols-4 gap-6 ${profil.jenisFaskes === 'Puskesmas' ? 'pt-4 border-t items-start' : 'items-start'}`}>
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase flex justify-between mb-1">
+                                                            {profil.jenisFaskes === 'Puskesmas' ? '4. RINCIAN UNIT' : 'PILIH / TAMBAH UNIT'}
+                                                            {(k.kegiatan || profil.jenisFaskes !== 'Puskesmas') && customUnitInputs[k.id] === undefined && (
+                                                                <button onClick={() => setCustomUnitInputs({...customUnitInputs, [k.id]: ''})} className="text-emerald-500 hover:text-emerald-700 text-[9px] flex items-center gap-1 transition">
+                                                                    <Icon name="Plus" className="w-3 h-3" /> Tambah Kustom
+                                                                </button>
+                                                            )}
+                                                        </label>
+                                                        <select className="input-inline font-black text-emerald-600 select-custom" disabled={profil.jenisFaskes === 'Puskesmas' ? !k.kegiatan : false} value={k.rincian} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, rincian: e.target.value}:x))}>
+                                                            <option value="">Pilih Unit</option>
+                                                            {(k.kegiatan || profil.jenisFaskes !== 'Puskesmas') && (() => {
+                                                                const activeKlaster = profil.jenisFaskes === 'Klinik' ? 'KLINIK' : profil.jenisFaskes === 'Rumah Sakit' ? 'RUMAH SAKIT' : k.klaster;
+                                                                const activeProgram = profil.jenisFaskes === 'Klinik' ? 'Layanan Di Klinik' : profil.jenisFaskes === 'Rumah Sakit' ? 'Layanan Di RS' : k.program;
+                                                                const activeKegiatan = profil.jenisFaskes === 'Klinik' ? 'Daftar Unit' : profil.jenisFaskes === 'Rumah Sakit' ? 'Daftar Unit' : k.kegiatan;
+
+                                                                const defaultOpts = currentDB[activeKlaster]?.[activeProgram]?.[activeKegiatan] || [];
+                                                                const customOpts = customUnits[profil.jenisFaskes]?.[activeKlaster]?.[activeProgram]?.[activeKegiatan] || [];
+                                                                const allOpts = [...defaultOpts, ...customOpts];
+                                                                return allOpts.map(opt => <option key={opt} value={opt}>{opt} {customOpts.includes(opt) ? '(Kustom)' : ''}</option>);
+                                                            })()}
+                                                        </select>
+                                                        
+                                                        {customUnitInputs[k.id] !== undefined && (
+                                                            <div className="flex gap-2 mt-3 p-2 bg-emerald-50 border border-emerald-200 rounded-lg animate-in slide-in-from-top-2">
+                                                                <input autoFocus className="flex-1 input-inline text-xs font-bold text-emerald-900 border-none bg-transparent" placeholder="Ketik nama unit baru..." value={customUnitInputs[k.id]} onChange={e => setCustomUnitInputs({...customUnitInputs, [k.id]: e.target.value})} />
+                                                                <button onClick={() => saveCustomUnit(k)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition"><i className="fas fa-check"></i></button>
+                                                                <button onClick={() => setCustomUnitInputs(prev => { const next = {...prev}; delete next[k.id]; return next; })} className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition"><i className="fas fa-times"></i></button>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {k.kategoriSaran?.length > 0 && (
+                                                            <div className="mt-3">
+                                                                <p className="text-[8px] font-bold text-slate-400 mb-1">KATEGORI RISIKO RELEVAN:</p>
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {k.kategoriSaran.map((kat, i) => (
+                                                                        <span key={i} className="text-[8px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">{kat}</span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">TUJUAN STRATEGIS</label><textarea className="input-inline italic text-xs h-16" value={k.tujuan} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, tujuan: e.target.value}:x))} /></div>
+                                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase">SASARAN KINERJA</label><textarea className="input-inline italic text-xs h-16" value={k.sasaran} onChange={e=>setKonteks(konteks.map(x=>x.id===k.id?{...x, sasaran: e.target.value}:x))} /></div>
+                                                    <div className="pt-4"><button onClick={()=>handleAIGoals(k.id)} className="w-full bg-blue-600 text-white p-3 rounded-2xl text-[10px] font-black flex items-center justify-center hover:scale-105 transition shadow"><Icon name="Sparkles" className="w-3 h-3 mr-2"/> SARAN AI</button></div>
                                                 </div>
                                                 {k.aiGoalOptions?.length > 0 && (
                                                     <div className="grid md:grid-cols-3 gap-3 mt-4">
                                                         {k.aiGoalOptions.map((opt, idx) => (
-                                                            <div key={idx} onClick={()=>{ setKonteks(konteks.map(x => x.id === k.id ? { ...x, tujuan: opt.tujuan, sasaran: opt.sasaran, aiGoalOptions: [] } : x)); }} className="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer text-[10px]">
-                                                                <p className="font-bold text-blue-800">Opsi {idx+1}:</p><p className="italic mb-1">{opt.tujuan}</p><p className="font-medium">{opt.sasaran}</p>
+                                                            <div key={idx} onClick={()=>{ setKonteks(konteks.map(x => x.id === k.id ? { ...x, tujuan: opt.tujuan, sasaran: opt.sasaran, kategoriSaran: opt.kategoriSaran || [], aiGoalOptions: [] } : x)); }} className="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer text-[10px]">
+                                                                <p className="font-bold text-blue-800 mb-1">Opsi {idx+1}:</p>
+                                                                <p className="italic mb-1">{opt.tujuan}</p>
+                                                                <p className="font-medium mb-2">{opt.sasaran}</p>
+                                                                {opt.kategoriSaran?.length > 0 && (
+                                                                    <div className="pt-2 border-t border-blue-100 flex flex-wrap gap-1">
+                                                                        {opt.kategoriSaran.map((kat, i) => <span key={i} className="text-[8px] bg-blue-200 text-blue-900 px-1 py-0.5 rounded">{kat}</span>)}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -602,12 +802,14 @@
                                         <table className="w-full text-[10px] border-collapse min-w-[2200px]">
                                             <thead className="bg-slate-800 text-white font-bold sticky top-0 z-10 text-center">
                                                 <tr>
-                                                    <th className="p-3 border border-slate-700" rowSpan="2">Unit</th><th className="p-3 border border-slate-700 text-yellow-300" rowSpan="2">Kategori</th><th className="p-3 border border-slate-700" colSpan="6">Identifikasi</th><th className="p-3 border border-slate-700" rowSpan="2">Kontrol</th><th className="p-3 border border-slate-700" colSpan="4">Inherent</th><th className="p-3 border border-slate-700" colSpan="2">Evaluasi</th><th className="p-3 border border-slate-700 text-yellow-300 no-print" rowSpan="2">AI</th>
+                                                    <th className="p-3 border border-slate-700" rowSpan="2">Unit / Konteks</th><th className="p-3 border border-slate-700 text-yellow-300 w-48" rowSpan="2">Kategori</th><th className="p-3 border border-slate-700" colSpan="6">Identifikasi</th><th className="p-3 border border-slate-700" rowSpan="2">Kontrol</th><th className="p-3 border border-slate-700" colSpan="4">Inherent</th><th className="p-3 border border-slate-700" colSpan="2">Evaluasi</th><th className="p-3 border border-slate-700 text-yellow-300 no-print" rowSpan="2">AI</th>
                                                 </tr>
                                                 <tr className="bg-slate-700 text-[8px]"><th>Sumber</th><th>Sebab</th><th>Kode</th><th>Risiko</th><th>Dampak</th><th>Narasi</th><th>D</th><th>K</th><th title="Bobot Non Klinis">B*</th><th>Skor</th><th>Selera</th><th>Mitigasi</th></tr>
                                             </thead>
                                             <tbody>
-                                                {risiko.map((r, i) => (
+                                                {risiko.map((r, i) => {
+                                                    const ctx = konteks.find(c => c.id === r.idKonteks);
+                                                    return (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRiskOptions?.length > 0 && (
                                                             <tr>
@@ -615,7 +817,11 @@
                                                                     <div className="grid md:grid-cols-3 gap-4">
                                                                         {r.aiRiskOptions.map((opt, idx) => (
                                                                             <div key={idx} onClick={()=>applyAiRiskOption(r.id, opt)} className="bg-white p-3 rounded-xl border border-emerald-200 cursor-pointer hover:shadow-lg">
-                                                                                <p className="font-bold text-emerald-900">Opsi {idx+1}: {opt.risiko}</p><p className="italic text-slate-600 mt-1">{opt.pernyataan}</p>
+                                                                                <div className="flex justify-between items-start mb-1">
+                                                                                    <p className="font-bold text-emerald-900">Opsi {idx+1}: {opt.risiko}</p>
+                                                                                    <span className="text-[8px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-black whitespace-nowrap uppercase">{opt.kategori || r.kategori}</span>
+                                                                                </div>
+                                                                                <p className="italic text-slate-600 mt-1 text-[10px]">{opt.pernyataan}</p>
                                                                             </div>
                                                                         ))}
                                                                     </div>
@@ -623,25 +829,38 @@
                                                             </tr>
                                                         )}
                                                         <tr className="hover:bg-slate-50 transition-colors">
-                                                            <td className="p-1 border"><select className="w-full bg-transparent font-bold outline-none text-blue-800" value={r.idKonteks} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}><option value="">Pilih</option>{konteks.map(c => <option key={c.id} value={c.id}>{c.rincian}</option>)}</select></td>
-                                                            <td className="p-1 border bg-emerald-50/50"><select className="w-full bg-transparent font-bold text-emerald-800 outline-none" value={r.kategori} onChange={e=>updateRisiko(r.id, 'kategori', e.target.value)}><option value="">Kategori</option>{KATEGORI_RISIKO.map(k=><option key={k}>{k}</option>)}</select></td>
-                                                            <td className="p-1 border"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sumber} onChange={e=>updateRisiko(r.id, 'identifikasi.sumber', e.target.value)} /></td>
-                                                            <td className="p-1 border"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sebab} onChange={e=>updateRisiko(r.id, 'identifikasi.sebab', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center font-mono font-bold bg-slate-100">{r.identifikasi.kode}</td>
-                                                            <td className="p-1 border font-bold text-emerald-800"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.risiko} onChange={e=>updateRisiko(r.id, 'identifikasi.risiko', e.target.value)} /></td>
-                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.identifikasi.dampak} onChange={e=>updateRisiko(r.id, 'identifikasi.dampak', e.target.value)} /></td>
-                                                            <td className="p-1 border bg-yellow-50/30"><textarea className="w-full h-12 italic text-[9px] bg-transparent outline-none" value={r.identifikasi.pernyataan} onChange={e=>updateRisiko(r.id, 'identifikasi.pernyataan', e.target.value)} /></td>
-                                                            <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none" value={r.analisa.pengendalian} onChange={e=>updateRisiko(r.id, 'analisa.pengendalian', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
-                                                            <td className="p-1 border text-center"><input type="number" disabled={isKlinis(r.kategori)} className={`w-8 text-center bg-transparent outline-none ${isKlinis(r.kategori) ? 'opacity-20 cursor-not-allowed' : 'text-blue-700 font-bold'}`} value={isKlinis(r.kategori) ? '' : r.analisa.b} onChange={e=>updateRisiko(r.id, 'analisa.b', e.target.value)} /></td>
-                                                            <td className={`p-1 border text-center font-black text-sm ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
-                                                            <td className="p-1 border"><select className="w-full bg-transparent text-[8px] outline-none" value={r.evaluasi.selera} onChange={e=>updateRisiko(r.id, 'evaluasi.selera', e.target.value)}><option>Diatas selera risiko</option><option>Dibawah selera risiko</option></select></td>
-                                                            <td className="p-1 border text-center"><select className="w-full bg-transparent outline-none font-bold" value={r.evaluasi.perluPenanganan} onChange={e=>updateRisiko(r.id, 'evaluasi.perluPenanganan', e.target.value)}><option>Ya</option><option>Tidak</option></select></td>
-                                                            <td className="p-1 border text-center no-print"><button onClick={()=>handleAIGenerateRisks(r.id)} className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:scale-110 shadow"><Icon name="Sparkles" /></button></td>
+                                                            <td className="p-1 border align-top"><select className="w-full bg-transparent font-bold outline-none text-blue-800" value={r.idKonteks} onChange={e=>updateRisiko(r.id, 'idKonteks', parseInt(e.target.value))}><option value="">Pilih Unit</option>{konteks.map(c => <option key={c.id} value={c.id}>{c.rincian}</option>)}</select></td>
+                                                            <td className="p-1 border bg-emerald-50/50 align-top">
+                                                                <select className="w-full bg-transparent font-bold text-emerald-800 outline-none mb-1" value={r.kategori} onChange={e=>updateRisiko(r.id, 'kategori', e.target.value)}>
+                                                                    <option value="">Pilih Kategori</option>
+                                                                    {KATEGORI_RISIKO.map(k=><option key={k} value={k}>{k}</option>)}
+                                                                </select>
+                                                                {ctx?.kategoriSaran?.length > 0 && (
+                                                                    <div className="flex flex-wrap gap-1 mt-1 border-t border-emerald-200/50 pt-1">
+                                                                        <span className="text-[6px] text-emerald-600 w-full block font-bold uppercase">Saran AI:</span>
+                                                                        {ctx.kategoriSaran.map(kat => (
+                                                                            <span key={kat} onClick={() => updateRisiko(r.id, 'kategori', kat)} className="text-[7px] bg-emerald-100 text-emerald-700 px-1 py-0.5 rounded cursor-pointer hover:bg-emerald-200 border border-emerald-200 transition" title="Klik untuk menerapkan">{kat}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-1 border align-top"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sumber} onChange={e=>updateRisiko(r.id, 'identifikasi.sumber', e.target.value)} /></td>
+                                                            <td className="p-1 border align-top"><input className="w-full bg-transparent outline-none" value={r.identifikasi.sebab} onChange={e=>updateRisiko(r.id, 'identifikasi.sebab', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center font-mono font-bold bg-slate-100 align-top">{r.identifikasi.kode}</td>
+                                                            <td className="p-1 border font-bold text-emerald-800 align-top"><textarea className="w-full h-16 bg-transparent outline-none" value={r.identifikasi.risiko} onChange={e=>updateRisiko(r.id, 'identifikasi.risiko', e.target.value)} /></td>
+                                                            <td className="p-1 border align-top"><textarea className="w-full h-16 bg-transparent outline-none" value={r.identifikasi.dampak} onChange={e=>updateRisiko(r.id, 'identifikasi.dampak', e.target.value)} /></td>
+                                                            <td className="p-1 border bg-yellow-50/30 align-top"><textarea className="w-full h-16 italic text-[9px] bg-transparent outline-none" value={r.identifikasi.pernyataan} onChange={e=>updateRisiko(r.id, 'identifikasi.pernyataan', e.target.value)} /></td>
+                                                            <td className="p-1 border align-top"><textarea className="w-full h-16 bg-transparent outline-none" value={r.analisa.pengendalian} onChange={e=>updateRisiko(r.id, 'analisa.pengendalian', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center align-top"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center align-top"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
+                                                            <td className="p-1 border text-center align-top"><input type="number" disabled={isKlinis(r.kategori)} className={`w-8 text-center bg-transparent outline-none ${isKlinis(r.kategori) ? 'opacity-20 cursor-not-allowed' : 'text-blue-700 font-bold'}`} value={isKlinis(r.kategori) ? '' : r.analisa.b} onChange={e=>updateRisiko(r.id, 'analisa.b', e.target.value)} /></td>
+                                                            <td className={`p-1 border text-center font-black text-sm align-top ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
+                                                            <td className="p-1 border align-top"><select className="w-full bg-transparent text-[8px] outline-none" value={r.evaluasi.selera} onChange={e=>updateRisiko(r.id, 'evaluasi.selera', e.target.value)}><option>Diatas selera risiko</option><option>Dibawah selera risiko</option></select></td>
+                                                            <td className="p-1 border text-center align-top"><select className="w-full bg-transparent outline-none font-bold" value={r.evaluasi.perluPenanganan} onChange={e=>updateRisiko(r.id, 'evaluasi.perluPenanganan', e.target.value)}><option>Ya</option><option>Tidak</option></select></td>
+                                                            <td className="p-1 border text-center no-print align-top"><button onClick={()=>handleAIGenerateRisks(r.id)} className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:scale-110 shadow"><Icon name="Sparkles" /></button></td>
                                                         </tr>
                                                     </React.Fragment>
-                                                ))}
+                                                )})}
                                             </tbody>
                                         </table>
                                     </div>
@@ -696,7 +915,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map(r => (
+                                                {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRtpOptions?.length > 0 && (
                                                             <tr>
@@ -736,7 +955,7 @@
                                 </div>
                             )}
 
-                            {step === 6 && (
+                            {step === 5 && (
                                 <div className="space-y-6 animate-in fade-in">
                                     <h2 className="text-3xl font-black uppercase">Form 3: Pemantauan (Monitoring)</h2>
                                     <div className="overflow-x-auto bg-white rounded-3xl border shadow-xl custom-scrollbar">
@@ -747,7 +966,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map(r => (
+                                                {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRealisasiOptions?.length > 0 && <tr><td colSpan="7" className="p-2 bg-blue-50 border"><div className="grid grid-cols-3 gap-2">{r.aiRealisasiOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.realisasi', opt.teks); updateRisiko(r.id, 'aiRealisasiOptions', []);}} className="p-3 bg-white border rounded-xl cursor-pointer font-medium hover:shadow">{opt.teks}</div>)}</div></td></tr>}
                                                         {r.aiHambatanOptions?.length > 0 && <tr><td colSpan="7" className="p-2 bg-red-50 border"><div className="grid grid-cols-3 gap-2">{r.aiHambatanOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.hambatan', opt.teks); updateRisiko(r.id, 'aiHambatanOptions', []);}} className="p-3 bg-white border rounded-xl cursor-pointer font-medium hover:shadow">{opt.teks}</div>)}</div></td></tr>}
@@ -782,7 +1001,7 @@
                                 </div>
                             )}
 
-                            {step === 7 && (
+                            {step === 6 && (
                                 <div className="space-y-6 animate-in zoom-in duration-300">
                                     <div className="bg-emerald-900 p-8 rounded-3xl flex flex-col md:flex-row justify-between items-center text-white no-print shadow-2xl">
                                         <div><h2 className="text-2xl font-black tracking-tight">Pusat Cetak Dokumen</h2><p className="text-emerald-200 text-xs">Gunakan Shortcut keyboard (Ctrl+P / Cmd+P) jika popup diblokir browser.</p></div>
@@ -824,7 +1043,7 @@
                                                             <tr key={i}>
                                                                 <td className="text-center font-bold border border-black">{i+1}</td>
                                                                 <td className="border border-black">{r.kategori}</td>
-                                                                <td className="border border-black">{ctx?.kegiatan}</td>
+                                                                <td className="border border-black">{profil.jenisFaskes === 'Puskesmas' ? ctx?.kegiatan : ctx?.rincian}</td>
                                                                 <td className="border border-black">{ctx?.sasaran}</td>
                                                                 <td className="border border-black">{r.identifikasi.sumber}</td>
                                                                 <td className="border border-black">{r.identifikasi.sebab}</td>
@@ -869,7 +1088,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => {
+                                                    {risiko.map((r, i) => {
                                                         const ctx = konteks.find(c=>c.id===r.idKonteks);
                                                         return (
                                                         <tr key={i}>
@@ -911,7 +1130,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {risiko.filter(r=>r.evaluasi.perluPenanganan==='Ya').map((r, i) => {
+                                                    {risiko.map((r, i) => {
                                                         const ctx = konteks.find(c=>c.id===r.idKonteks);
                                                         return (
                                                         <tr key={i}>
@@ -966,9 +1185,31 @@
                                             <div className="kop-surat mb-6 uppercase">
                                                 <h1 className="text-lg font-black tracking-tighter">LAMPIRAN: KRITERIA DAN MATRIKS PENILAIAN RISIKO</h1>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4 mb-4">
+
+                                            <div className="mb-4 break-inside-avoid">
+                                                <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 1: KRITERIA PEMBOBOTAN (B*) RISIKO NON-KLINIS</h3>
+                                                <table className="w-full border-collapse border border-black text-[7px] text-center mb-2">
+                                                    <thead className="bg-slate-100 font-bold">
+                                                        <tr>
+                                                            <th className="border border-black p-1 w-24">Nilai<br/>Bobot (B*)</th>
+                                                            <th className="border border-black p-1 w-1/3">Dampak Finansial<br/>(% dari Total Anggaran Fasyankes)</th>
+                                                            <th className="border border-black p-1">Dampak Reputasi / Operasional<br/>(Berlaku Umum)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr><td className="border border-black font-bold">1 (Sangat Rendah)</td><td className="border border-black">&lt; 0.1% dari Anggaran</td><td className="border border-black text-left pl-2">Keluhan lisan langsung ditangani, tidak ada henti operasional.</td></tr>
+                                                        <tr><td className="border border-black font-bold">2 (Rendah)</td><td className="border border-black">0.1% - 0.5% dari Anggaran</td><td className="border border-black text-left pl-2">Keluhan tertulis, operasional terhenti &lt; 2 jam.</td></tr>
+                                                        <tr><td className="border border-black font-bold">3 (Sedang)</td><td className="border border-black">0.5% - 1% dari Anggaran</td><td className="border border-black text-left pl-2">Masuk media lokal, operasional terhenti 2 - 8 jam.</td></tr>
+                                                        <tr><td className="border border-black font-bold">4 (Tinggi)</td><td className="border border-black">1% - 5% dari Anggaran</td><td className="border border-black text-left pl-2">Masuk media nasional, gugatan hukum, operasional terhenti 1 hari.</td></tr>
+                                                        <tr><td className="border border-black font-bold">5 (Sangat Tinggi)</td><td className="border border-black">&gt; 5% dari Anggaran</td><td className="border border-black text-left pl-2">Kehilangan izin operasional, pimpinan dituntut pidana, operasional Faskes lumpuh total.</td></tr>
+                                                    </tbody>
+                                                </table>
+                                                <p className="text-[7px] italic font-bold text-red-700">*Catatan Khusus: Nilai persentase (%) dan definisi dampak (finansial, reputasi, operasional, dll) pada tabel di atas <strong>HANYA SEBAGAI CONTOH</strong>. Fasyankes dapat menyesuaikan kriteria ini dengan kebijakan internal. Untuk Kategori "Klinis / Keselamatan Pasien", Bobot (B*) secara mutlak bernilai 1.</p>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 mb-4 break-inside-avoid">
                                                 <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 1: TINGKAT KEMUNGKINAN (K)</h3>
+                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 2: TINGKAT KEMUNGKINAN (K)</h3>
                                                     <table className="w-full border-collapse border border-black text-[7px] text-center">
                                                         <thead className="bg-slate-100 font-bold">
                                                             <tr><th className="border border-black">Level</th><th className="border border-black">Kriteria</th><th className="border border-black">Frekuensi Aktual</th></tr>
@@ -983,7 +1224,7 @@
                                                     </table>
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 4: MATRIKS GRADING RISIKO (D x K)</h3>
+                                                    <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 3: MATRIKS GRADING RISIKO (D x K)</h3>
                                                     <table className="w-full border-collapse border border-black text-[7px] text-center font-bold">
                                                         <tbody>
                                                             <tr>
