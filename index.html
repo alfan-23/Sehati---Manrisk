@@ -34,7 +34,7 @@
             .print-section:last-child { page-break-after: auto; }
             .print-appendix { display: block; page-break-before: always; width: 100%; }
             
-            /* KODE BARU: Memaksa warna background dan text muncul di PDF khusus Lampiran & Badge Skor */
+            /* PEMAKSAAN WARNA UNTUK CETAK PDF (BACKGROUND & TEXT) */
             .print-appendix, .print-appendix *, .print-color-exact {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -55,16 +55,31 @@
 
     <div id="mainAppWrapper" class="w-full min-h-screen no-select relative">
         <div id="userInfoFloating" class="fixed top-4 right-4 z-[100] bg-white text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-emerald-200 flex items-center gap-2 no-print">
-            <i class="fas fa-shield-alt text-emerald-600"></i> <span class="text-slate-700 uppercase">Lingkungan Canvas Aktif</span>
+            <i class="fas fa-shield-alt text-emerald-600"></i> <span class="text-slate-700 uppercase">Akses Portal Terenkripsi</span>
         </div>
         <div id="root"></div>
     </div>
 
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyFromUrl = urlParams.get('key');
+        const modelFromUrl = urlParams.get('model');
+        
+        if (keyFromUrl) {
+            sessionStorage.setItem('sehati_api_key', keyFromUrl);
+        }
+        if (modelFromUrl) {
+            sessionStorage.setItem('sehati_ai_model', modelFromUrl);
+        }
+        
+        if (keyFromUrl || modelFromUrl) {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+        }
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-
-        // API Key langsung dari environment Canvas
-        const apiKey = ""; 
 
         const Icon = ({ name, className = "w-5 h-5" }) => {
             return <i className={`fas fa-${name === 'Building2' ? 'building' : name === 'AlertTriangle' ? 'exclamation-triangle' : name === 'Target' ? 'bullseye' : name === 'Search' ? 'search' : name === 'Printer' ? 'print' : name === 'BrainCircuit' ? 'brain' : name === 'Save' ? 'save' : name === 'Upload' ? 'upload' : name === 'Activity' ? 'chart-line' : name === 'Sparkles' ? 'wand-magic-sparkles' : name === 'Trash2' ? 'trash' : name === 'ChevronLeft' ? 'chevron-left' : name === 'ChevronRight' ? 'chevron-right' : name === 'Plus' ? 'plus' : 'circle'} ${className}`}></i>;
@@ -215,10 +230,20 @@
 
         const generateKode = (kategori, index) => `${kategori ? kategori.substring(0, 3).toUpperCase() : 'RSK'}-${String(index).padStart(2, '0')}`;
 
-        // FUNGSI API GENERATOR DENGAN SIKLUS ROTASI BACKOFF DI LINGKUNGAN CANVAS
+        // FUNGSI API GENERATOR DENGAN SIKLUS ROTASI (TERHUBUNG KE DASHBOARD) & SANITIZER JSON
         const callGeminiJson = async (prompt, schemaFormat) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const fullPrompt = `TUGAS: Anda adalah asisten pakar Manajemen Risiko Fasyankes. Berikan hasil DALAM FORMAT JSON.\n\nSKEMA JSON:\n${JSON.stringify(schemaFormat, null, 2)}\n\nPERINTAH:\n${prompt}`;
+            const userApiKey = sessionStorage.getItem('sehati_api_key');
+            let activeModelName = sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash';
+
+            if (!userApiKey) throw new Error("API Key belum terhubung dengan Portal.");
+            
+            let modelToUse = 'gemini-1.5-flash';
+            if (activeModelName && !activeModelName.includes('Mengecek') && !activeModelName.includes('Error') && !activeModelName.includes('Kosong')) {
+                modelToUse = activeModelName;
+            }
+            
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${userApiKey}`;
+            const fullPrompt = `TUGAS: Anda adalah asisten pakar Manajemen Risiko Fasyankes. Berikan hasil DALAM FORMAT JSON YANG VALID TANPA MARKDOWN (tanpa backticks \`\`\`json).\n\nSKEMA JSON:\n${JSON.stringify(schemaFormat, null, 2)}\n\nPERINTAH:\n${prompt}`;
             
             let delay = 1000;
             for (let retry = 0; retry < 5; retry++) { 
@@ -233,13 +258,29 @@
                     });
                     
                     if (!response.ok) {
+                        if (response.status === 429 || response.status === 404 || response.status === 403 || response.status >= 500) {
+                            if (window.parent !== window) {
+                                window.parent.postMessage({ type: 'API_ERROR', code: response.status }, '*');
+                            }
+                            throw new Error("API_FAIL_ROTATE");
+                        }
+                        if (response.status === 400) throw new Error("API Key tidak valid atau Format Prompt salah.");
                         throw new Error(`HTTP Error ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    let textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    return JSON.parse(textResponse); 
+                    let textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                    
+                    // FUNGSI PEMBERSIH MARKDOWN OTOMATIS (Mencegah AI Gagal Sintesa)
+                    let cleanJson = textResponse.replace(/```json/gi, '').replace(/```/gi, '').trim();
+                    
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'API_SUCCESS' }, '*');
+                    }
+                    
+                    return JSON.parse(cleanJson); 
                 } catch (e) {
+                    if (e.message === "API_FAIL_ROTATE") throw e; 
                     if (retry === 4) throw e;
                     await new Promise(res => setTimeout(res, delay)); delay *= 2; 
                 }
@@ -250,11 +291,70 @@
             const [step, setStep] = useState(1);
             const [isSidebarOpen, setIsSidebarOpen] = useState(true);
             const [toast, setToast] = useState("");
+            
+            // UI Input Manual Kunci API dipertahankan untuk pemakaian Standalone
+            const [apiKey, setApiKey] = useState(() => sessionStorage.getItem('sehati_api_key') || '');
+            const [activeModel, setActiveModel] = useState(() => sessionStorage.getItem('sehati_ai_model') || 'gemini-2.5-flash');
             const fileInputRef = useRef(null);
+            
+            const isWaitingForRetry = useRef(null);
 
             const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 5000); };
             const handlePrint = () => { showToast("Menyiapkan dokumen..."); setTimeout(() => { window.print(); }, 1000); };
             const isKlinis = (kat) => kat === 'Klinis / Keselamatan Pasien';
+
+            const verifyKey = async () => {
+                if (!apiKey) { 
+                    setActiveModel("API Key Kosong"); 
+                    return; 
+                }
+                setActiveModel("Mengecek koneksi...");
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                    if (!res.ok) throw new Error("Key tidak valid");
+                    const data = await res.json();
+                    const validModels = data.models.filter(m => m.supportedGenerationMethods?.includes("generateContent") && m.name.includes("gemini"));
+                    let selected = validModels.find(m => m.name.includes('1.5-flash')) || validModels.find(m => m.name.includes('flash')) || validModels[0];
+                    setActiveModel(selected.name.replace('models/', ''));
+                } catch (e) {
+                    setActiveModel("Error Koneksi API");
+                }
+            };
+
+            // Listener Komunikasi dari Dashboard
+            useEffect(() => {
+                const handleMessage = (event) => {
+                    if (event.data && event.data.type === 'UPDATE_CONFIG') {
+                        setApiKey(event.data.key);
+                        setActiveModel(event.data.model || 'gemini-2.5-flash');
+                        sessionStorage.setItem('sehati_api_key', event.data.key);
+                        sessionStorage.setItem('sehati_ai_model', event.data.model || 'gemini-2.5-flash');
+                        
+                        if (isWaitingForRetry.current) {
+                            showToast(`🔄 Melanjutkan proses dengan model ${event.data.model}...`);
+                            const retryFunc = isWaitingForRetry.current;
+                            isWaitingForRetry.current = null;
+                            setTimeout(() => retryFunc(), 1000);
+                        }
+                    }
+                    
+                    if (event.data && event.data.type === 'STOP_RETRY') {
+                        isWaitingForRetry.current = null;
+                        showToast("❌ Siklus Terhenti: Seluruh API Key dan Model gagal memproses.");
+                        setTimeout(() => {
+                            alert("Sistem telah mencoba semua Slot API Key dan Model AI secara otomatis, namun semuanya kehabisan kuota atau gagal.\n\nSilakan periksa konfigurasi API Key Anda di Dashboard.");
+                        }, 500);
+                    }
+                };
+                
+                window.addEventListener('message', handleMessage);
+                
+                if (!sessionStorage.getItem('sehati_api_key') && window.parent !== window) {
+                    window.parent.postMessage({ type: 'REQUEST_CONFIG' }, '*');
+                }
+                
+                return () => window.removeEventListener('message', handleMessage);
+            }, []);
 
             const [profil, setProfil] = useState({ jenisFaskes: 'Puskesmas', faskes: 'Puskesmas', pimpinan: 'dr. Pimpinan', tahun: '2026', tanggal: new Date().toISOString().split('T')[0] });
             const [konteks, setKonteks] = useState([{ 
@@ -263,7 +363,6 @@
                 kategoriSaran: ['Klinis / Keselamatan Pasien', 'Operasional'], aiGoalOptions: [] 
             }]);
             
-            // State untuk menampung unit kustom yang tersimpan lokal
             const [customUnits, setCustomUnits] = useState(() => {
                 try {
                     return JSON.parse(localStorage.getItem('simr_custom_units')) || {};
@@ -452,7 +551,10 @@
                     });
                     setKonteks(prev => prev.map(x => x.id === cId ? { ...x, aiGoalOptions: res.options } : x));
                 } catch (e) { 
-                    showToast(`❌ Gagal: Memerlukan waktu, silakan coba lagi.`); 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIGoals(cId);
+                    } else { showToast(`❌ Gagal: AI mengembalikan format yang salah.`); console.error(e); }
                 }
             };
 
@@ -468,7 +570,10 @@
                     const res = await callGeminiJson(`Buat 3 opsi risiko untuk kegiatan/unit "${c?.rincian || ''}". \nSyarat: ${kategoriText}. \n${panduan}`, { options: [{ kategori: "string", sumber: "Internal/Eksternal", sebab: "string", risiko: "string", dampak: "string", pernyataan: "Sebab->Risiko->Dampak", d: "1-5", k: "1-5", b: "1-5", pengendalian: "string" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRiskOptions: res.options } : item));
                 } catch (e) { 
-                    showToast(`❌ Gagal: Terjadi kesalahan jaringan.`); 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIGenerateRisks(rId);
+                    } else { showToast(`❌ Gagal: AI mengembalikan format yang salah.`); console.error(e); }
                 }
             };
 
@@ -494,7 +599,10 @@
                     const res = await callGeminiJson(`Lakukan RCA mendalam 5-Why untuk risiko: "${r.identifikasi.pernyataan}". Gali kegagalan sistemik/kebijakan.`, { rca: { w1: "string", w2: "string", w3: "string", w4: "string", w5: "string", akar: "string", jenis: "Man/Money/Material/Method/Machine" } });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, rca: res.rca } : item));
                 } catch (e) { 
-                    showToast(`❌ Gagal memproses RCA, silakan coba lagi.`);
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIRCA(rId);
+                    } else { showToast(`❌ Gagal memproses RCA.`); console.error(e); }
                 }
             };
 
@@ -506,7 +614,10 @@
                     const res = await callGeminiJson(`Beri 3 saran rencana penanganan efektif (RTP) mengatasi akar masalah: "${r.rca.akar}".`, { options: [{ opsi: "Pilih: Reduksi/Transfer/Hindari", biaya: "Retensi/Transfer", uraian: "string", waktu: "string", rd: "1-5", rk: "1-5", pemilik: "Jabatan" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, aiRtpOptions: res.options } : item));
                 } catch (e) { 
-                    showToast(`❌ Gagal menyusun RTP, silakan ulangi.`); 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIRTP(rId);
+                    } else { showToast(`❌ Gagal menyusun RTP.`); console.error(e); }
                 }
             };
 
@@ -534,7 +645,10 @@
                     const res = await callGeminiJson(p, { options: [{ teks: "string" }] });
                     setRisiko(prev => prev.map(item => item.id === rId ? { ...item, [`ai${phase}Options`]: res.options } : item));
                 } catch (e) { 
-                    showToast(`❌ Gagal menyusun Monitoring, silakan coba lagi.`); 
+                    if(e.message === "API_FAIL_ROTATE") {
+                        showToast("⏳ Kuota/Model limit. Menunggu rotasi otomatis...");
+                        isWaitingForRetry.current = () => handleAIMonitoring(rId, phase);
+                    } else { showToast(`❌ Gagal menyusun Monitoring.`); console.error(e); }
                 }
             };
 
@@ -574,11 +688,12 @@
                             {isSidebarOpen ? (
                                 <div className="flex flex-col gap-2">
                                     <p className="text-[10px] text-slate-400 font-mono text-center mb-1">
-                                        Status API: <span className="text-emerald-400 font-bold">Terhubung Otomatis</span>
+                                        Model: <span className={activeModel.includes('Error') || activeModel.includes('Kosong') ? 'text-red-500' : 'text-emerald-400 font-bold'}>{activeModel}</span>
                                     </p>
-                                    <p className="text-[9px] text-slate-500 font-mono text-center mb-1">
-                                        Model: gemini-2.5-flash
-                                    </p>
+                                    <input type="password" placeholder="Input API Key Gemini..." className="w-full text-[10px] p-2 rounded-lg bg-slate-800 text-white border border-slate-700 text-center outline-none" value={apiKey} onChange={(e) => { setApiKey(e.target.value); sessionStorage.setItem('sehati_api_key', e.target.value); }} />
+                                    <button onClick={verifyKey} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] py-2 rounded-lg font-bold transition-colors shadow">
+                                        <Icon name="Activity" className="w-3 h-3 inline mr-1" /> Cek Koneksi API
+                                    </button>
                                 </div>
                             ) : (
                                 <Icon name="Activity" className="text-emerald-500 mx-auto w-4 h-4"/>
@@ -754,7 +869,7 @@
                                                             <td className="p-1 border text-center align-top"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.d} onChange={e=>updateRisiko(r.id, 'analisa.d', e.target.value)} /></td>
                                                             <td className="p-1 border text-center align-top"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.analisa.k} onChange={e=>updateRisiko(r.id, 'analisa.k', e.target.value)} /></td>
                                                             <td className="p-1 border text-center align-top"><input type="number" disabled={isKlinis(r.kategori)} className={`w-8 text-center bg-transparent outline-none ${isKlinis(r.kategori) ? 'opacity-20 cursor-not-allowed' : 'text-blue-700 font-bold'}`} value={isKlinis(r.kategori) ? '' : r.analisa.b} onChange={e=>updateRisiko(r.id, 'analisa.b', e.target.value)} /></td>
-                                                            <td className={`p-1 border text-center font-black text-sm align-top ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
+                                                            <td className={`p-1 border text-center font-black text-sm align-top print-color-exact ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
                                                             <td className="p-1 border align-top"><select className="w-full bg-transparent text-[8px] outline-none" value={r.evaluasi.selera} onChange={e=>updateRisiko(r.id, 'evaluasi.selera', e.target.value)}><option>Diatas selera risiko</option><option>Dibawah selera risiko</option></select></td>
                                                             <td className="p-1 border text-center align-top"><select className="w-full bg-transparent outline-none font-bold" value={r.evaluasi.perluPenanganan} onChange={e=>updateRisiko(r.id, 'evaluasi.perluPenanganan', e.target.value)}><option>Ya</option><option>Tidak</option></select></td>
                                                             <td className="p-1 border text-center no-print align-top"><button onClick={()=>handleAIGenerateRisks(r.id)} className="bg-yellow-100 text-yellow-700 p-2 rounded-full hover:scale-110 shadow"><Icon name="Sparkles" /></button></td>
@@ -772,10 +887,10 @@
                                     <h2 className="text-3xl font-black">Langkah 3: RCA (5-Why)</h2>
                                     {risiko.map(r => (
                                         <div key={r.id} className="bg-white p-8 rounded-3xl shadow-xl border mb-6 relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-3 h-full bg-blue-500"></div>
+                                            <div className="absolute top-0 left-0 w-3 h-full bg-blue-500 print-color-exact"></div>
                                             <div className="flex justify-between items-start mb-6">
                                                 <div>
-                                                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold font-mono shadow">{r.identifikasi.kode || 'KODE'}</span>
+                                                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold font-mono shadow print-color-exact">{r.identifikasi.kode || 'KODE'}</span>
                                                     <h3 className="text-xl font-black mt-3 text-slate-800">{r.identifikasi.risiko || 'Pernyataan risiko kosong...'}</h3>
                                                     <p className="text-xs italic text-slate-500 mt-1">"{r.identifikasi.pernyataan}"</p>
                                                 </div>
@@ -786,7 +901,7 @@
                                                     <div key={n}><label className="text-[10px] font-black text-slate-400 mb-1 block">WHY {n}</label><textarea className="w-full p-3 border rounded-xl h-24 text-xs bg-slate-50 outline-none" value={r.rca[`w${n}`]} onChange={e=>updateRisiko(r.id, `rca.w${n}`, e.target.value)} /></div>
                                                 ))}
                                             </div>
-                                            <div className="bg-red-50 p-6 rounded-2xl border-2 border-dashed border-red-200 flex flex-col md:flex-row gap-6">
+                                            <div className="bg-red-50 p-6 rounded-2xl border-2 border-dashed border-red-200 flex flex-col md:flex-row gap-6 print-color-exact">
                                                 <div className="flex-1">
                                                     <label className="text-[10px] font-black text-red-600 uppercase">Akar Masalah Sistemik</label>
                                                     <input className="w-full bg-transparent font-black text-lg outline-none border-b border-red-300 pb-1 mt-1 text-red-900" value={r.rca.akar} onChange={e=>updateRisiko(r.id, 'rca.akar', e.target.value)} />
@@ -815,6 +930,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {/* Semua risiko masuk, filter disembunyikan dihapus */}
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRtpOptions?.length > 0 && (
@@ -835,7 +951,7 @@
                                                             <td className="p-2 border text-center font-mono font-bold bg-slate-100">{r.identifikasi.kode}</td>
                                                             <td className="p-2 border"><p className="font-bold text-slate-800 mb-1">{r.identifikasi.risiko}</p><p className="italic text-red-700 font-medium">Akar: {r.rca.akar}</p></td>
                                                             <td className="p-2 border text-center bg-slate-50">{r.analisa.d}</td><td className="p-2 border text-center bg-slate-50">{r.analisa.k}</td><td className="p-2 border text-center bg-slate-50 text-blue-600">*</td>
-                                                            <td className={`p-2 border text-center font-black text-sm ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
+                                                            <td className={`p-2 border text-center font-black text-sm print-color-exact ${getTingkat(r.analisa.skor).color}`}>{r.analisa.skor}</td>
                                                             <td className="p-1 border"><select className="w-full bg-transparent outline-none" value={r.rtp.opsi} onChange={e=>updateRisiko(r.id, 'rtp.opsi', e.target.value)}>{OPSI_PENANGANAN.map(o=><option key={o}>{o}</option>)}</select></td>
                                                             <td className="p-1 border"><textarea className="w-full h-12 bg-transparent outline-none font-medium" value={r.rtp.uraian} onChange={e=>updateRisiko(r.id, 'rtp.uraian', e.target.value)} /></td>
                                                             <td className="p-1 border"><input className="w-full text-center bg-transparent outline-none" value={r.rtp.waktu} onChange={e=>updateRisiko(r.id, 'rtp.waktu', e.target.value)} /></td>
@@ -843,7 +959,7 @@
                                                             <td className="p-1 border text-center bg-emerald-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.rtp.rd} onChange={e=>updateRisiko(r.id, 'rtp.rd', e.target.value)} /></td>
                                                             <td className="p-1 border text-center bg-emerald-50"><input type="number" className="w-8 text-center font-black bg-transparent outline-none" value={r.rtp.rk} onChange={e=>updateRisiko(r.id, 'rtp.rk', e.target.value)} /></td>
                                                             <td className="p-1 border text-center bg-emerald-50 text-emerald-600">*</td>
-                                                            <td className={`p-2 border text-center font-black text-sm ${getTingkat(r.rtp.rskor).color}`}>{r.rtp.rskor}</td>
+                                                            <td className={`p-2 border text-center font-black text-sm print-color-exact ${getTingkat(r.rtp.rskor).color}`}>{r.rtp.rskor}</td>
                                                             <td className="p-1 border bg-yellow-50/30"><input className="w-full bg-transparent outline-none text-center font-bold text-emerald-900" value={r.rtp.pemilik} onChange={e=>updateRisiko(r.id, 'rtp.pemilik', e.target.value)} /></td>
                                                             <td className="p-2 border text-center no-print"><button onClick={()=>handleAIRTP(r.id)} className="bg-emerald-100 text-emerald-700 p-2 rounded-full hover:scale-110 shadow"><Icon name="Sparkles" /></button></td>
                                                         </tr>
@@ -866,6 +982,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {/* Semua risiko masuk, filter disembunyikan dihapus */}
                                                 {risiko.map(r => (
                                                     <React.Fragment key={r.id}>
                                                         {r.aiRealisasiOptions?.length > 0 && <tr><td colSpan="7" className="p-2 bg-blue-50 border"><div className="grid grid-cols-3 gap-2">{r.aiRealisasiOptions.map((opt, idx) => <div key={idx} onClick={()=>{updateRisiko(r.id, 'monitoring.realisasi', opt.teks); updateRisiko(r.id, 'aiRealisasiOptions', []);}} className="p-3 bg-white border rounded-xl cursor-pointer font-medium hover:shadow">{opt.teks}</div>)}</div></td></tr>}
@@ -1125,7 +1242,7 @@
                                                 </div>
                                                 <div>
                                                     <h3 className="font-bold text-[9px] mb-1 bg-slate-200 p-1 text-center border border-black">TABEL 3: MATRIKS GRADING RISIKO (D x K)</h3>
-                                                    <table className="w-full border-collapse border border-black text-[7px] text-center font-bold">
+                                                    <table className="w-full border-collapse border border-black text-[7px] text-center font-bold print-color-exact">
                                                         <tbody>
                                                             <tr>
                                                                 <td rowSpan="6" className="w-6 rotate-180 transform bg-slate-100 border border-black" style={{ writingMode: 'vertical-rl' }}>KEMUNGKINAN (K)</td>
